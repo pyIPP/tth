@@ -1,0 +1,11 @@
+#!/bin/csh -f
+
+source /etc/profile.d/modules.csh
+
+setenv MODULEPATH ${MODULEPATH}:/afs/@cell/common/usr/modules/@sys/modulefiles/TOK
+
+module purge
+module load anaconda/2_4.2.0
+
+cd $HOME/python/tau
+python ttonl.py

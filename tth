@@ -1,0 +1,38 @@
+#!/bin/csh -f
+
+
+setenv osy `fs sysname | awk -F\' '{print $2}'`
+
+if ($osy == 'amd64_sles11') then
+
+# To enable matplotlib.pylab.draw()
+  set matdir  = $HOME/.matplotlib
+  mkdir -p $matdir
+  set font = $matdir/fontList.cache
+  set tmp  = $matdir/fontList.tmp
+  cp $font $tmp
+  cp /afs/ipp/home/g/git/.matplotlib/fontList.temp $font
+
+# Take working matplotlibrc during the TRGUI session, then switch back
+
+  set rc = $matdir/matplotlibrc
+  set sav = $matdir/matplotlibrc_sav
+  if (-f $rc) then
+    mv $rc $sav
+  endif
+
+  setenv LANG en_GB.UTF-8 # For labels in matplotlib
+  setenv LC_ALL en_US.UTF8
+
+  source /etc/profile.d/modules.csh
+  module purge
+  module load python27/python/2.7 python27/scipy/2015.10 py27-aug_diags
+
+else
+
+  alias python /usr/ads/diags/python2.7/bin/python2.7
+
+endif
+
+cd $HOME/python/tau
+python toth_gui.py
