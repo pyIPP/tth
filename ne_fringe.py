@@ -25,6 +25,7 @@ def fringe_jumps(time_in, sig_in, flattop_end):
     jtflattop_end = np.min(np.where(time_in > flattop_end))        
     jtdiff = int(delta_t_filter/(time_in[1]-time_in[0])) + 1
     jtmin = np.min(np.where(time_in > 0.5))
+# git    jtmin = max(5, jtdiff+1)
     jtjump = len(time_in)-1
     for jt in range(jtmin, jtflattop_end):
         sig_t1 = sig_in[jt-jtdiff]

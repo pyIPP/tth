@@ -2,9 +2,9 @@ import os
 import numpy as np
 import scipy.ndimage
 import NBIlosses, tderiv, wfi, ne_fringe, dcn_chords, ne_sep_sol
-import dd_20140407
+import dd_20180130, jou_main_spec
 
-sf  = dd_20140407.shotfile()
+sf = dd_20180130.shotfile()
 
 
 parlaws = { \
@@ -27,29 +27,26 @@ laws = { \
         {'scalmod': 'tau_tot', 'coeff':0.038, 'A':0.38, 'IpiFP':0.76, 'P_TOT':-0.5, 'P_NET':0,         \
          'Rgeo':1.87, 'ahor':0.2, 'kappa':0.8, 'karea':0, 'H-1_corr':0.11, 'BTF':0.19},     \
     'ITERH-92P(y, th), ELMy, Wth/Pnet': \
-        {'scalmod': 'tau_th', 'coeff':0.034, 'A':0.4, 'IpiFP':0.90, 'P_TOT':0, 'P_NET':-0.65,         \
-         'Rgeo':1.9, 'ahor':0.2, 'kappa':0.8, 'karea':0, 'H-1_corr':0.3, 'BTF':0.05},         \
+        {'scalmod': 'tau_th', 'coeff':0.034, 'A':0.4, 'IpiFP':0.90, 'P_TOT':0, 'P_NET':-0.65,   \
+         'Rgeo':1.9, 'ahor':0.2, 'kappa':0.8, 'karea':0, 'H-1_corr':0.3, 'BTF':0.05},           \
     'ITERH-93P(th), ELM free, Wth/Pnet': \
-        {'scalmod': 'tau_th', 'coeff':0.036, 'A':0.41, 'IpiFP':1.06, 'P_TOT':0, 'P_NET':-0.67,        \
-         'Rgeo':1.9, 'ahor':-0.11, 'kappa':0.66, 'karea':0, 'H-1_corr':0.17, 'BTF':0.32}, \
+        {'scalmod': 'tau_th', 'coeff':0.036, 'A':0.41, 'IpiFP':1.06, 'P_TOT':0, 'P_NET':-0.67,  \
+         'Rgeo':1.9, 'ahor':-0.11, 'kappa':0.66, 'karea':0, 'H-1_corr':0.17, 'BTF':0.32},       \
     'ITERH-98P(y, th), ELMy, Wth/Pnet': \
-        {'scalmod': 'tau_th', 'coeff':0.0365, 'A':0.2, 'IpiFP':0.97, 'P_TOT':0, 'P_NET':-0.63,        \
-         'Rgeo':1.70, 'ahor':0.23, 'kappa':0.67, 'karea':0, 'H-1_corr':0.41, 'BTF':0.08}, \
+        {'scalmod': 'tau_th', 'coeff':0.0365, 'A':0.2, 'IpiFP':0.97, 'P_TOT':0, 'P_NET':-0.63,  \
+         'Rgeo':1.70, 'ahor':0.23, 'kappa':0.67, 'karea':0, 'H-1_corr':0.41, 'BTF':0.08},       \
     'ITERH-98P(y, th, 2), ELMy, Wth/Pnet': \
-        {'scalmod': 'tau_th', 'coeff':0.0562, 'A':0.19, 'IpiFP':0.93, 'P_TOT':0, 'P_NET':-0.69,     \
-         'Rgeo':1.39, 'ahor':0.58, 'kappa':0, 'karea':0.78, 'H-1_corr':0.41, 'BTF':0.15}, \
+        {'scalmod': 'tau_th', 'coeff':0.0562, 'A':0.19, 'IpiFP':0.93, 'P_TOT':0, 'P_NET':-0.69, \
+         'Rgeo':1.39, 'ahor':0.58, 'kappa':0, 'karea':0.78, 'H-1_corr':0.41, 'BTF':0.15},       \
     'DS03 or ESGB, McDonald, ppcf 46 (2004) A215 equation 11': \
-        {'scalmod': 'tau_th', 'coeff':0.028, 'A':0.14, 'IpiFP':0.83, 'P_TOT':0, 'P_NET':-0.55,        \
-         'Rgeo':1.81, 'ahor':0.3, 'kappa':0.75, 'karea':0, 'H-1_corr':0.49, 'BTF':0.07},    \
+        {'scalmod': 'tau_th', 'coeff':0.028, 'A':0.14, 'IpiFP':0.83, 'P_TOT':0, 'P_NET':-0.55,  \
+         'Rgeo':1.81, 'ahor':0.3, 'kappa':0.75, 'karea':0, 'H-1_corr':0.49, 'BTF':0.07},        \
     'CORDEY05, NF 45 (2005) 1078, equation 9': \
-        {'scalmod': 'tau_th', 'coeff':0.0506, 'A':0.11, 'IpiFP':0.85, 'P_TOT':0, 'P_NET':-0.45,     \
-         'Rgeo':1.21, 'ahor':0.39, 'kappa':0, 'karea':0.82, 'H-1_corr':0.26, 'BTF':0.17},    \
+        {'scalmod': 'tau_th', 'coeff':0.0506, 'A':0.11, 'IpiFP':0.85, 'P_TOT':0, 'P_NET':-0.45, \
+         'Rgeo':1.21, 'ahor':0.39, 'kappa':0, 'karea':0.82, 'H-1_corr':0.26, 'BTF':0.17},       \
     'KARDAUN, IAEA 2006, IT/P10': \
-        {'scalmod': 'tau_tot', 'coeff':0, 'A':0, 'IpiFP':0, 'P_TOT':0, 'P_NET':0,     \
-         'Rgeo':0, 'ahor':0, 'kappa':0, 'karea':0, 'H-1_corr':0, 'BTF':0} \
-#    'KARDAUN-LANG, IAEA 2012, EX/P4-01': \
-#        {'scalmod': 'tau_tot', 'coeff':0, 'A':0, 'IpiFP':0, 'P_TOT':0, 'P_NET':0,     \
-#         'Rgeo':0, 'ahor':0, 'kappa':0, 'karea':0, 'H-1_corr':0, 'BTF':0}
+        {'scalmod': 'tau_th', 'coeff':0, 'A':0, 'IpiFP':0, 'P_TOT':0, 'P_NET':0, \
+         'Rgeo':0, 'ahor':0, 'kappa':0, 'karea':0, 'H-1_corr':0, 'BTF':0}        \
 }
 
 tth_laws = ( \
@@ -136,16 +133,9 @@ class ex_toth:
             need    = int(toth_d['ne_ed'])
             exp_write = toth_d['out_exp'].strip()
             NBIpar = toth_d['NBIpar'].strip()[:6]
-            ion_mass = 2
             t_fr = float(toth_d['t_fringe'])
             if t_fr == 0.:
                 t_fr = None
-
-            if 'spec' in toth_d.keys():
-                if toth_d['spec'].strip() == 'H':
-                    ion_mass = 1
-                if toth_d['spec'].strip() == 'He':
-                    ion_mass = 4
 
             home_dir = os.getenv('HOME')
             os.system('mkdir -p '+home_dir+'/shotfiles/TOT')
@@ -238,6 +228,9 @@ class ex_toth:
 
             ipl_ref = 0.2*max(ipl)
             ind_down =  (ipl < ipl_ref ) & (tfpc > 1)
+            if np.sum(ind_down) < 1:
+                msg_quit(nshot, 'Ipl signal too short')
+                return
             flattop_end = tfpc[ind_down][-1] - 0.8
             print('Estimated flat top end: %8.4f' %flattop_end)
 
@@ -259,6 +252,7 @@ class ex_toth:
             print('\nT_end is min of %8.4f, %8.4f, %8.4f' %(ttot_full[-1], tequ[-1], self.tot['Fringe']['tjump']) )
             nttot = np.where(ttot_full < t_end)[0][-1]
 
+            print 'nttot', nttot
             ttot = ttot_full[:nttot]
             self.tot['time'] = ttot
             self.tth['time'] = ttot
@@ -339,6 +333,7 @@ class ex_toth:
 #----
 # JOU
 #----
+            ion_mass_d = {'H': 1, 'D': 2, 'He': 4}
             jouflag = {}
             diag = 'JOU'
             if sf.Open(diag, nshot):
@@ -351,16 +346,14 @@ class ex_toth:
                             if pval > 0:
                                 jouflag[heat_lbl] = True
                                 break
-#                    pval = sf.GetParameter('FILLING', 'GAS')
-#                    if not np.isnan(pval):
-#                        if pval > 0:
-#                            Amass = pval
                 sf.Close()
 
-            if (ion_mass != 2):
-                if jouflag['NBI']:
-                    msg = 'No TTH for non deuterium plasmas, NBI present'
-                    msg_quit(nshot, msg)
+            main_spec = jou_main_spec.spec_jou_sf(nshot)
+            if main_spec is None:
+                ion_mass = 2
+            else:
+                print('Main ion species is %s' %main_spec)
+                ion_mass = ion_mass_d[main_spec]
 
             self.tot['Setup']['A'] = int(ion_mass)
 
@@ -483,7 +476,7 @@ class ex_toth:
                 pniq = np.zeros((nttot, nnbi), dtype=np.float32)
                 sig = 'PNIQ'
                 tnis = sf.GetTimebase(sig)
-                datnis = sf.GetSignalGroup(sig)
+                datnis = sf.GetSignal(sig)
                 sf.Close()
                 ni_eny = np.zeros(nnbi, dtype=np.float32)
                 jsrc = 0
@@ -629,9 +622,9 @@ class ex_toth:
                             twfi += pnbi*loss.wfi
                         jsrc += 1
 
-            tot_loss = self.tot['SHINE_TH']
+            tth_loss = np.zeros_like(ttot)
             for sig in ('SOL', 'ORB', 'CX', 'RIP'):
-                tot_loss += self.tth['%s_LOSS' %sig]
+                tth_loss += self.tth['%s_LOSS' %sig]
  
 # Modify Wfi retaining NBI switching
 
@@ -641,10 +634,10 @@ class ex_toth:
             self.tot['P_TOT'] = self.tot['P_OH'] + self.tot['heat_par']['fac_icrh']*self.tot['PICR_TOT'] + \
                             self.tot['heat_par']['fac_ecrh']*self.tot['PECR_TOT'] + \
                             self.tot['PNBI_TOT'] - self.tot['SHINE_TH'] - self.tot['dWmhd/dt']
-            tot_loss = np.minimum(tot_loss, self.tot['P_TOT'])
-            tot_loss = np.maximum(tot_loss, 0.)
-            self.tth['PNBI_NET'] = self.tot['PNBI_TOT'] - tot_loss
-            self.tth['P_NET']    = self.tot['P_TOT']    - tot_loss
+            tth_loss = np.minimum(tth_loss, self.tot['P_TOT'])
+            tth_loss = np.maximum(tth_loss, 0.)
+            self.tth['PNBI_NET'] = self.tot['PNBI_TOT'] - tth_loss - self.tot['SHINE_TH']
+            self.tth['P_NET']    = self.tot['P_TOT']    - tth_loss # Shine through already subtracted in P_TOT
             self.tot['P_NET']    = self.tth['P_NET']    # Double; useful for scaling laws, deleted in the end
             self.tot['tau_tot']  = self.tot['Wmhd']/self.tot['P_TOT']
             self.tth['tau_th']   = self.tot['Wth' ]/self.tth['P_NET']

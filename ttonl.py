@@ -7,6 +7,8 @@ import dd_20180130
 import ww_20180130
 import exec_toth
 
+sf  = dd_20180130.shotfile()
+
 firstshot = False
 # On a non-shotday the loop is terminated by the crontab final time (7 p.m.)
 while not firstshot:
@@ -49,6 +51,11 @@ if any_shot_today.anyshot():
         if 'time' in toth1.tot.iterkeys():
             if sfdiff.sfdiff(nshot1, toth_d['out_exp'], 'TOT', toth1.tot):
                 ww_20180130.write_sf(nshot1, toth1.tot, sfhdir, 'TOT', exp=toth_d['out_exp'])
+            toth1.tth['TOT_file']['edition'] = -1
+            if sf.Open('TOT', nshot1):
+                print('\nTOT edition used for TTH: %d\n' %sf.edition)
+                toth1.tth['TOT_file']['edition'] = sf.edition
+                sf.Close()
             if sfdiff.sfdiff(nshot1, toth_d['out_exp'], 'TTH', toth1.tth):
                 ww_20180130.write_sf(nshot1, toth1.tth, sfhdir, 'TTH', exp=toth_d['out_exp'])
 

@@ -13,7 +13,7 @@ sys.path.append('/afs/ipp/home/g/git/python/repository')
 sys.path.append('/afs/ipp/aug/ads-diags/common/python/lib')
 try:
     import Tkinter as tk
-    import ttk
+    import ttk, tkFont
 except:
     import tkinter as tk
     from tkinter import ttk
@@ -21,7 +21,9 @@ import numpy as np
 import matplotlib.pylab as plt
 import tkhyper, sfdiff
 import exec_toth, plot_toth
-import ww_20180130 as ww
+import dd_20180130, ww_20180130
+
+sf  = dd_20180130.shotfile()
 
 frc = '#b0d0b0'  # Frame, Notebook, Checkbutton
 tbc = '#eaeaea'  # Toolbar, Button
@@ -37,17 +39,22 @@ class TOTH:
         tothframe.title('TOT/TTH evaluation')
         tothframe.configure(bg=frc)
 
+#        print(tkFont.families())
+        toth_font = tkFont.Font(family='Century', size=15)
+        tothframe.option_add("*Font", toth_font)
+
 # Widgets style
 
         ypad = 2
         xpad = 1
 
         sty = ttk.Style()
+        sty.theme_use('alt')
         sty.configure('TNotebook.Tab', background=frc, width=12)
         sty.configure('TFrame', background=frc)
         sty.configure('TCheckbutton', background=frc)
         sty.configure('TButton', background=tbc, width=10)
-        sty.configure('TLabel', background=frc, relief='groove', width=14)
+        sty.configure('TLabel', background=frc, relief='groove', width=18)
         sty.configure('TEntry', background=frc, width=8)
 
 # Menubar
@@ -156,17 +163,6 @@ class TOTH:
 #---
         locframe = ttk.Frame(rbframe)
         locframe.pack(side=tk.TOP, anchor=tk.W, pady=ypad)
-        ttk.Label(locframe, text='Main ion species').pack(side=tk.LEFT, anchor=tk.W, padx=xpad)
-
-        key = 'spec'
-        self.toth_d[key] = tk.StringVar()
-        self.toth_d[key].set('D')
-        for val in ('D', 'H', 'He'):
-           ttk.Radiobutton(locframe, variable=self.toth_d[key], \
-                value=val, text=val).pack(side=tk.LEFT, anchor=tk.W)
-#---
-        locframe = ttk.Frame(rbframe)
-        locframe.pack(side=tk.TOP, anchor=tk.W, pady=ypad)
         ttk.Label(locframe, text='Force TOT').pack(side=tk.LEFT, anchor=tk.W, padx=xpad)
 
         key = 'force_tot'
@@ -234,11 +230,17 @@ class TOTH:
                 exp_write = self.toth_d['out_exp'].get().strip()
 # TOT
                 if force_tot or sfdiff.sfdiff(self.nshot, exp_write, 'TOT', self.toth.tot):
-                    status = ww.write_sf(self.nshot, self.toth.tot, sfhdir, \
+                    status = ww_20180130.write_sf(self.nshot, self.toth.tot, sfhdir, \
                              'TOT', exp=exp_write)
+
+                self.toth.tth['TOT_file']['edition'] = -1
+                if sf.Open('TOT', self.nshot):
+                    print('\nTOT edition used for TTH: %d\n' %sf.edition)
+                    self.toth.tth['TOT_file']['edition'] = sf.edition
+                    sf.Close()
 # TTH
                 if force_tth or sfdiff.sfdiff(self.nshot, exp_write, 'TTH', self.toth.tth):
-                    status = ww.write_sf(self.nshot, self.toth.tth, sfhdir, \
+                    status = ww_20180130.write_sf(self.nshot, self.toth.tth, sfhdir, \
                              'TTH', exp=exp_write)
             else:
                 print('No data to store')
