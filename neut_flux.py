@@ -1,20 +1,19 @@
 import sys
 sys.path.append('/afs/ipp/aug/ads-diags/common/python/lib')
 import numpy as np
-import dd_20140407
+import dd_20180130
 
-sf = dd_20140407.shotfile()
+sf = dd_20180130.shotfile()
 ioc_sig = ('F04', 'F09', 'F03', 'F01')
 
 
 class IOC_FLUX:
 
 
-    def __init__(self, nshot):
+    def __init__(self, nshot, verb=False):
 
         nioc = len(ioc_sig)
         ntioc = 0
-        jioc = 0
 
         if sf.Open('IOC', nshot):
             self.tioc = sf.GetTimebase('Timebase')
@@ -22,14 +21,18 @@ class IOC_FLUX:
             self.iflux = 0
             self.neut_flux = np.empty(ntioc)
             self.neut_flux[:] = np.nan
-            for sig in ioc_sig:
-                trace = sf.GetSignal(sig)
-                if trace is not None:
-                    no_nan = np.isfinite(trace)
-                    self.neut_flux[no_nan] = trace[no_nan]
-                    self.iflux = jioc
-                    self.ioc_flag = 0
-                jioc+= 1
+            for jioc, sig in enumerate(ioc_sig):
+                trace = sf.GetSignal(sig)[:ntioc]
+                if (trace is None) or (np.sum(trace) == 0.):
+                    continue
+                no_nan = np.isfinite(trace)
+                if verb:
+                    print(sig, len(no_nan), np.sum(no_nan), np.sum(trace), len(trace), len(self.neut_flux), len(self.tioc))
+                for j, val in enumerate(trace):
+                    if no_nan[j]:
+                        self.neut_flux[j] = val
+                self.iflux = jioc
+                self.ioc_flag = 0
             sf.Close()
         else:
             self.iflux = 8
@@ -47,19 +50,21 @@ if __name__ == '__main__':
     import matplotlib.pylab as plt
 
 #    nshot = 18863
-    nshot = 28053
+    nshot = 33804
  
-    ioc = IOC_FLUX(nshot)
+    ioc = IOC_FLUX(nshot, verb=True)
     ntioc = len(ioc.tioc)
 
     dioc = {}
 
     if sf.Open('IOC', nshot):
         for sig in ioc_sig:
-            tmp = sf.GetSignal(sig)
+            tmp = sf.GetSignal(sig)[:ntioc]
             if tmp is not None:
                 if len(tmp) == ntioc:
                     dioc[sig] = tmp
+            else:
+                print('Signal %s not found' %sig)
         sf.Close()
 
     plt.figure(1)

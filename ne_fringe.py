@@ -1,7 +1,7 @@
 import numpy as np
-import dd_20140407
+import dd_20180130
 
-sf  = dd_20140407.shotfile()
+sf  = dd_20180130.shotfile()
 
 dcn_sig = { 'DCS': 'nedl_H1', 'DCK': 'H-1', \
             'DCN': 'H-1', 'DCR': 'H-1', 'DCP': 'H-1'}
@@ -40,17 +40,20 @@ def fringe_jumps(time_in, sig_in, flattop_end):
     return time_in[jtjump]
 
 
-def dc_jump(nshot, diag_in, flattop_end=10., exp_in='AUGD', ed_in=0):
+def dc_jump(nshot, diag_in, sig_in=None, flattop_end=10., exp_in='AUGD', ed_in=0):
 
     tjump_dc = 0
     ne_ed = None
+    if sig_in is None:
+        ne_sig = dcn_sig[diag_in]
+    else:
+        ne_sig = sig_in
 
     if diag_in not in dcn_sig.keys():
         print('Diag %s not supported' %diag_in)
         return tjump_dc, ne_ed
 
     if sf.Open(diag_in, nshot, experiment=exp_in, edition=ed_in):
-        ne_sig = dcn_sig[diag_in]
         tdcn = sf.GetTimebase(ne_sig)
         dcn_ref = sf.GetSignal(ne_sig, cal=True)
         ne_ed = sf.edition
@@ -63,10 +66,10 @@ def dc_jump(nshot, diag_in, flattop_end=10., exp_in='AUGD', ed_in=0):
     else:
         print('Shotfile %s not found for #%d' %(diag_in, nshot))
 
-    return tjump_dc, ne_ed
+    return tjump_dc, ne_sig, ne_ed
 
 
-def ne_fringe(nshot, flattop_end=10., exp_in='AUGD', diag_in='DCK', ed_in=0, tj_forced=None):
+def ne_fringe(nshot, flattop_end=10., exp_in='AUGD', diag_in='DCK', sig_in='H-1', ed_in=0, tj_forced=None):
 
 # Hierarchy: 
 #1) prescribed (if any)
@@ -78,7 +81,9 @@ def ne_fringe(nshot, flattop_end=10., exp_in='AUGD', diag_in='DCK', ed_in=0, tj_
     ne_diag = diag_in
     ne_exp  = exp_in
     ne_ed   = ed_in
-    tjump_dc, dcn_ed = dc_jump(nshot, ne_diag, flattop_end=flattop_end, exp_in=ne_exp, ed_in=ne_ed)
+    if ne_diag == 'DCS':
+        sig_in = 'nedl_H1'
+    tjump_dc, dcn_sig, dcn_ed = dc_jump(nshot, ne_diag, sig_in=sig_in, flattop_end=flattop_end, exp_in=ne_exp, ed_in=ne_ed)
     if (dcn_ed is not None) and (tj_forced is not None):
         tjump_dc = tj_forced
 
@@ -88,7 +93,7 @@ def ne_fringe(nshot, flattop_end=10., exp_in='AUGD', diag_in='DCK', ed_in=0, tj_
         ne_exp  = 'AUGD'
         ne_diag = 'DCK'
         ne_ed   = 0
-        tjump_dc, dcn_ed = dc_jump(nshot, ne_diag, flattop_end=flattop_end, exp_in=ne_exp, ed_in=ne_ed)
+        tjump_dc, dcn_sig, dcn_ed = dc_jump(nshot, ne_diag, sig_in=sig_in, flattop_end=flattop_end, exp_in=ne_exp, ed_in=ne_ed)
 
 #AUGD:DCN(0) 2nd fallback
 
@@ -96,7 +101,7 @@ def ne_fringe(nshot, flattop_end=10., exp_in='AUGD', diag_in='DCK', ed_in=0, tj_
         ne_exp  = 'AUGD'
         ne_diag = 'DCN'
         ne_ed   = 0
-        tjump_dc, dcn_ed = dc_jump(nshot, ne_diag, flattop_end=flattop_end, exp_in=ne_exp, ed_in=ne_ed)
+        tjump_dc, dcn_sig, dcn_ed = dc_jump(nshot, ne_diag, sig_in=sig_in, flattop_end=flattop_end, exp_in=ne_exp, ed_in=ne_ed)
 
 # What was really used
 
@@ -105,6 +110,6 @@ def ne_fringe(nshot, flattop_end=10., exp_in='AUGD', diag_in='DCK', ed_in=0, tj_
     else:
         tjump = tjump_dc
         fringe_d = {'exp': ne_exp, 'diag': ne_diag, \
-                    'sig': dcn_sig[ne_diag], 'ed': dcn_ed, 'tjump': tjump}
+                    'sig': dcn_sig, 'ed': dcn_ed, 'tjump': tjump}
 
     return fringe_d

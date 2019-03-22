@@ -10,43 +10,43 @@ sf = dd_20180130.shotfile()
 parlaws = { \
     'prefac':'coeff', 'a_i':'A', 'Ip':'IpiFP', 'P_tot':'P_TOT', 'P_net':'P_NET', \
     'Rgeo':'Rgeo', 'ahor':'ahor', 'kappa':'kappa', 'karea':'karea', \
-    '<ne>_H-1':'H-1_corr', 'Btf':'BTF' \
+    '<ne>_H-1':'ne_lav', 'Btf':'BTF' \
                 }
 
 laws = { \
     'ITERL-89P(tot), Wtot/Ptot': \
         {'scalmod': 'tau_tot', 'coeff':0.038, 'A':0.5, 'IpiFP':0.85, 'P_TOT':-0.5, 'P_NET':0,            \
-         'Rgeo':1.2, 'ahor':0.3, 'kappa':0.5, 'karea':0, 'H-1_corr':0.1, 'BTF':0.2},            \
+         'Rgeo':1.2, 'ahor':0.3, 'kappa':0.5, 'karea':0, 'ne_lav':0.1, 'BTF':0.2},            \
     'ITERL-96P(th), Wth/Pnet': \
         {'scalmod': 'tau_th', 'coeff':0.023, 'A':0.2, 'IpiFP':0.96, 'P_TOT':0, 'P_NET':-0.73,         \
-         'Rgeo':1.89, 'ahor':-0.06, 'kappa':0.64, 'karea':0, 'H-1_corr':0.4, 'BTF':0.03}, \
+         'Rgeo':1.89, 'ahor':-0.06, 'kappa':0.64, 'karea':0, 'ne_lav':0.4, 'BTF':0.03}, \
     'ITERH92PY:tau_E, ELMy, Wtot/Pnet': \
         {'scalmod': 'tau_hybr', 'coeff':0.051, 'A':0.51, 'IpiFP':0.83, 'P_TOT':0, 'P_NET':-0.51,        \
-         'Rgeo':1.76, 'ahor':0.11, 'kappa':0.5, 'karea':0, 'H-1_corr':0.05, 'BTF':0.1},     \
+         'Rgeo':1.76, 'ahor':0.11, 'kappa':0.5, 'karea':0, 'ne_lav':0.05, 'BTF':0.1},     \
     'ITERH-92P(y, tot), ELMy, Wtot/Ptot': \
         {'scalmod': 'tau_tot', 'coeff':0.038, 'A':0.38, 'IpiFP':0.76, 'P_TOT':-0.5, 'P_NET':0,         \
-         'Rgeo':1.87, 'ahor':0.2, 'kappa':0.8, 'karea':0, 'H-1_corr':0.11, 'BTF':0.19},     \
+         'Rgeo':1.87, 'ahor':0.2, 'kappa':0.8, 'karea':0, 'ne_lav':0.11, 'BTF':0.19},     \
     'ITERH-92P(y, th), ELMy, Wth/Pnet': \
         {'scalmod': 'tau_th', 'coeff':0.034, 'A':0.4, 'IpiFP':0.90, 'P_TOT':0, 'P_NET':-0.65,   \
-         'Rgeo':1.9, 'ahor':0.2, 'kappa':0.8, 'karea':0, 'H-1_corr':0.3, 'BTF':0.05},           \
+         'Rgeo':1.9, 'ahor':0.2, 'kappa':0.8, 'karea':0, 'ne_lav':0.3, 'BTF':0.05},           \
     'ITERH-93P(th), ELM free, Wth/Pnet': \
         {'scalmod': 'tau_th', 'coeff':0.036, 'A':0.41, 'IpiFP':1.06, 'P_TOT':0, 'P_NET':-0.67,  \
-         'Rgeo':1.9, 'ahor':-0.11, 'kappa':0.66, 'karea':0, 'H-1_corr':0.17, 'BTF':0.32},       \
+         'Rgeo':1.9, 'ahor':-0.11, 'kappa':0.66, 'karea':0, 'ne_lav':0.17, 'BTF':0.32},       \
     'ITERH-98P(y, th), ELMy, Wth/Pnet': \
         {'scalmod': 'tau_th', 'coeff':0.0365, 'A':0.2, 'IpiFP':0.97, 'P_TOT':0, 'P_NET':-0.63,  \
-         'Rgeo':1.70, 'ahor':0.23, 'kappa':0.67, 'karea':0, 'H-1_corr':0.41, 'BTF':0.08},       \
+         'Rgeo':1.70, 'ahor':0.23, 'kappa':0.67, 'karea':0, 'ne_lav':0.41, 'BTF':0.08},       \
     'ITERH-98P(y, th, 2), ELMy, Wth/Pnet': \
         {'scalmod': 'tau_th', 'coeff':0.0562, 'A':0.19, 'IpiFP':0.93, 'P_TOT':0, 'P_NET':-0.69, \
-         'Rgeo':1.39, 'ahor':0.58, 'kappa':0, 'karea':0.78, 'H-1_corr':0.41, 'BTF':0.15},       \
+         'Rgeo':1.39, 'ahor':0.58, 'kappa':0, 'karea':0.78, 'ne_lav':0.41, 'BTF':0.15},       \
     'DS03 or ESGB, McDonald, ppcf 46 (2004) A215 equation 11': \
         {'scalmod': 'tau_th', 'coeff':0.028, 'A':0.14, 'IpiFP':0.83, 'P_TOT':0, 'P_NET':-0.55,  \
-         'Rgeo':1.81, 'ahor':0.3, 'kappa':0.75, 'karea':0, 'H-1_corr':0.49, 'BTF':0.07},        \
+         'Rgeo':1.81, 'ahor':0.3, 'kappa':0.75, 'karea':0, 'ne_lav':0.49, 'BTF':0.07},        \
     'CORDEY05, NF 45 (2005) 1078, equation 9': \
         {'scalmod': 'tau_th', 'coeff':0.0506, 'A':0.11, 'IpiFP':0.85, 'P_TOT':0, 'P_NET':-0.45, \
-         'Rgeo':1.21, 'ahor':0.39, 'kappa':0, 'karea':0.82, 'H-1_corr':0.26, 'BTF':0.17},       \
+         'Rgeo':1.21, 'ahor':0.39, 'kappa':0, 'karea':0.82, 'ne_lav':0.26, 'BTF':0.17},       \
     'KARDAUN, IAEA 2006, IT/P10': \
         {'scalmod': 'tau_th', 'coeff':0, 'A':0, 'IpiFP':0, 'P_TOT':0, 'P_NET':0, \
-         'Rgeo':0, 'ahor':0, 'kappa':0, 'karea':0, 'H-1_corr':0, 'BTF':0}        \
+         'Rgeo':0, 'ahor':0, 'kappa':0, 'karea':0, 'ne_lav':0, 'BTF':0}        \
 }
 
 tth_laws = ( \
@@ -130,6 +130,7 @@ class ex_toth:
             equed   = int(toth_d['equ_ed'])
             neexp   = toth_d['ne_exp'].strip()
             nediag  = toth_d['ne_diag'].strip()
+            nesig   = toth_d['ne_sig'].strip()
             need    = int(toth_d['ne_ed'])
             exp_write = toth_d['out_exp'].strip()
             NBIpar = toth_d['NBIpar'].strip()[:6]
@@ -177,12 +178,13 @@ class ex_toth:
                 print( 'Equilibrium data for shot %d %s:%s(%d)' \
                         %(nshot, equexp, equdiag, sf.edition) )
             else:
-                if equdiag == 'FPG':
-                    print('%s:FPG(%d) not found, using AUGD:GQH(0) instead' %(equexp, equed))
-                    equdiag = 'GQH'
-                elif equdiag == 'GQH':
-                    print('%s:GQH(%d) not found, using AUGD:FPG(0) instead' %(equexp, equed))
+                print('%s:%s(%d) not found, using AUGD:GQH(0) instead' %(equexp, equdiag, equed))
+                if equdiag == 'GQH':
                     equdiag = 'FPG'
+                else:
+                    equdiag = 'GQH'
+                print('Using AUGD:%s(0) instead' %equdiag)
+
 # Fallback
                 if sf.Open(equdiag, nshot, experiment='AUGD', edition=0):
                     print( 'Equilibrium data for shot %d AUGD:%s(%d)' \
@@ -225,22 +227,27 @@ class ex_toth:
                 sig  = 'IpiFP'
                 ipl = sf.GetSignal(sig)
                 tfpc = sf.GetTimebase(sig)
+                sf.Close()
 
             ipl_ref = 0.2*max(ipl)
-            ind_down =  (ipl < ipl_ref ) & (tfpc > 1)
-            if np.sum(ind_down) < 1:
-                msg_quit(nshot, 'Ipl signal too short')
-                return
-            flattop_end = tfpc[ind_down][-1] - 0.8
+            jmax = np.argmax(ipl)
+            (ipl_low, ) = np.where(ipl < ipl_ref )
+            if ipl_low[-1] > jmax:
+                ind_down = (ipl < ipl_ref )  & (tfpc > 1)
+                if np.sum(ind_down) < 1:
+                    msg_quit(nshot, 'Ipl signal too short')
+                    return
+                flattop_end = tfpc[ind_down][-1] - 0.8
+            else:
+                flattop_end = tfpc[-1] - 0.8
             print('Estimated flat top end: %8.4f' %flattop_end)
 
 #-----------------------
 # Fringe jumps detection
 #-----------------------
-
             flattop_equ_end = min(tequ[-1], flattop_end)
             self.tot['Fringe'] = ne_fringe.ne_fringe(nshot, flattop_end=flattop_equ_end, \
-                exp_in=neexp, diag_in=nediag, ed_in=need, tj_forced=t_fr)
+                exp_in=neexp, diag_in=nediag, sig_in=nesig, ed_in=need, tj_forced=t_fr)
 
             print('Time of fringe jump: %8.4f' %self.tot['Fringe']['tjump'])
 
@@ -265,42 +272,60 @@ class ex_toth:
 
             print('\nSubstract offset, normalise by chord length')
 
-            exp  = self.tot['Fringe']['exp']
-            diag = self.tot['Fringe']['diag']
-            sig  = self.tot['Fringe']['sig']
-            ed   = self.tot['Fringe']['ed']
-            print('DC signal: %s:%s:%s(%d)' %(exp, diag, sig, ed) )
+            dcexp  = self.tot['Fringe']['exp']
+            dcdiag = self.tot['Fringe']['diag']
+            dcsig  = self.tot['Fringe']['sig']
+            dced   = self.tot['Fringe']['ed']
+            print('DC signal: %s:%s:%s(%d)' %(dcexp, dcdiag, dcsig, dced) )
 
-            ne_h1 = 1e-19*sig2toth(ttot, nshot, diag, sig)
-            offset_h1 = np.average(ne_h1[0: 10]) # First 10 ms
+            n_dcn = 6
+            ne_l_av = {}
+
             min_chord_len = 0.05
-            if diag == 'DCS':
-                ne_lav = ne_h1 - offset_h1 # unit 10**19 m**-3
-                self.tot['H-1_corr'] = ne_lav
-                self.tot['H-4_corr'] = np.zeros_like(ttot)
-                self.tot['peak'] = np.ones_like(ttot)
-            else:
-                ne_h4 = 1e-19*sig2toth(ttot, nshot, diag, 'H-4')
-                offset_h4 = np.average(ne_h4[0: 10]) # First 10 ms
-                len_h1 = sig2toth(ttot, nshot, equdiag, 'lenH-1')
-                if len_h1 is None:
-                    len_d14 = dcn_chords.chord_len(nshot, diag='EQH', sig=['H-1', 'H-4'])
-                    len_h1 = len_d14['H-1'][:nttot]
-                    len_h4 = len_d14['H-4'][:nttot]
-                else:
-                    len_h4 = sig2toth(ttot, nshot, equdiag, 'lenH-4')
-                len_h1 = np.maximum(len_h1, min_chord_len)
-                len_h4 = np.maximum(len_h4, min_chord_len)
-                ne_lav    = (ne_h1 - offset_h1)/len_h1
-                ne_lav_h4 = (ne_h4 - offset_h4)/len_h4
+            for jdcn in range(n_dcn):
+                self.tot['H-%d_corr' %jdcn] = np.zeros_like(ttot)
 
-                pf = ne_lav/ne_lav_h4
+            if dcdiag == 'DCS':
+                ne_h = sig2toth(ttot, nshot, dcdiag, dcsig, exp=dcexp)
+                offset_h = np.average(ne_h[0: 10])     # First 10 ms
+                self.tot['ne_lav'] = ne_h - offset_h # unit 10**19 m**-3
+                self.tot['peak'] = np.ones_like(ttot)
+
+            else: # default
+
+                len_h = sig2toth(ttot, nshot, equdiag, 'lenH-1')
+                if len_h is None: # use map_equ, separatrix crossing
+                    len_d = dcn_chords.chord_len(nshot, diag='EQH')
+                    for jdcn in range(n_dcn):
+                        tmp = sig2toth(ttot, nshot, dcdiag, 'H-%d' %jdcn, exp=dcexp)
+                        if tmp is not None:
+                            ne_h = 1e-19*tmp
+                            offset_h = np.average(ne_h[0: 10]) # First 10 ms
+                            len_h = np.maximum(len_d[jdcn][:nttot], min_chord_len)
+                            self.tot['H-%d_corr' %jdcn] = (ne_h - offset_h)/len_h
+
+                else: # default, chord from GQH
+
+                    for jdcn in range(n_dcn):
+                        tmp = sig2toth(ttot, nshot, dcdiag, 'H-%d' %jdcn, exp=dcexp)
+                        if tmp is not None:
+                            ne_h = 1e-19*tmp
+                            offset_h = np.average(ne_h[0: 10]) # First 10 ms
+                            len_h = sig2toth(ttot, nshot, equdiag, 'lenH-%d' %jdcn)
+                            if len_h is None:
+                                len_d = dcn_chords.chord_len(nshot, diag='EQH', dcn_ch=jdcn)
+                                len_h = np.maximum(len_d[jdcn][:nttot], min_chord_len)
+                            if len_h is not None:
+                                self.tot['H-%d_corr' %jdcn] = (ne_h - offset_h)/len_h
+
+                if nesig == 'H-0':
+                    self.tot['ne_lav'] = self.tot['H-0_corr']
+                else:
+                    self.tot['ne_lav'] = self.tot['H-1_corr']
+                pf = self.tot['ne_lav']/self.tot['H-4_corr']
                 pf = np.maximum(pf, 0.8)
 
-                self.tot['H-1_corr'] = ne_lav
-                self.tot['H-4_corr'] = ne_lav_h4
                 self.tot['peak'] = np.minimum(pf, 4)
-
 
 #-----
 # Zeff
@@ -309,8 +334,8 @@ class ex_toth:
             print('Zeff')
 
             max_zef = 4.5
-            ind_one = (ne_lav > 1)
-            self.tot['Zeff'] = np.minimum(max_zef, 11.2/(ne_lav - 0.74))
+            ind_one = (self.tot['ne_lav'] > 1)
+            self.tot['Zeff'] = np.minimum(max_zef, 11.2/(self.tot['ne_lav'] - 0.74))
             self.tot['Zeff'][~ind_one] = max_zef
 
 #==================
@@ -352,7 +377,7 @@ class ex_toth:
             if main_spec is None:
                 ion_mass = 2
             else:
-                print('Main ion species is %s' %main_spec)
+                print('\nMain ion species is %s\n' %main_spec)
                 ion_mass = ion_mass_d[main_spec]
 
             self.tot['Setup']['A'] = int(ion_mass)
@@ -370,6 +395,9 @@ class ex_toth:
                     l12smo = scipy.ndimage.gaussian_filter1d(lid12, 10, axis = -1, order = 0, output = None, mode = 'reflect', cval = 0.)
                     ULid12 = np.interp(ttot, tmag, l12smo)
                     sf.Close()
+                else:
+                    msg_quit(nshot, 'Missing MAY')
+                    return
             else:
                 diag = 'MAG'
                 if sf.Open(diag, nshot):
@@ -544,17 +572,17 @@ class ex_toth:
             if pnbi_max > 0:
                 print('\nCalculating slowing down time')
 
-                indt = (pmhd > 100) & (ne_lav > 0.01)
-                self.tth['Te_av'][indt]  = 0.2067*pmhd[indt]/ne_lav[indt]
+                indt = (pmhd > 100) & (self.tot['ne_lav'] > 0.01)
+                self.tth['Te_av'][indt]  = 0.2067*pmhd[indt]/self.tot['ne_lav'][indt]
                 self.tth['Ec'][indt]     = 0.01865*self.tth['Te_av'][indt]
-                self.tth['tau_sp'][indt] = np.maximum(7.376*1e-6*np.power(self.tth['Te_av'][indt], 1.5), 0)/ne_lav[indt]
+                self.tth['tau_sp'][indt] = np.maximum(7.376*1e-6*np.power(self.tth['Te_av'][indt], 1.5), 0)/self.tot['ne_lav'][indt]
 
                 ind_src = (ni_eny > 0)
                 for jsrc in range(nnbi):
                     tau_sd[indt, jsrc] = self.tth['tau_sp'][indt]/3*np.log(1 + np.power(ni_eny[jsrc]/self.tth['Ec'][indt], 1.5))
                 tau_sd[:, ~ind_src] = 0.020
                 for jt in range(nttot):
-                    if (pmhd[jt] > 100) and (ne_lav[jt] > 0.01):
+                    if (pmhd[jt] > 100) and (self.tot['ne_lav'][jt] > 0.01):
                         pie = np.zeros(nnbi, dtype=np.float32)
                         pie[ind_src] = self.tth['Ec'][jt]*3.0/(2.0*ni_eny[ind_src])
                         qie = 3.68*np.power(pie, 1.2)
@@ -608,12 +636,12 @@ class ex_toth:
                                      NBIlosses.solloss(nshot, pow_frac[pn], EdivA, jsrc)
                             self.tth['RIP_LOSS'] += NBIlosses.riploss(nshot, jsrc)
                             if NBIpar == 'FAFNER':
-                                loss = NBIlosses.FAFPAR(nshot, pow_frac[pn], ne_lav, Te_lav, \
+                                loss = NBIlosses.FAFPAR(nshot, pow_frac[pn], self.tot['ne_lav'], Te_lav, \
                                        self.tth['NE_SEP']*1e-19, tau_sd[:, jsrc], EdivA, jsrc)
 
                             if NBIpar == 'TRANSP':
                                 loss = NBIlosses.TRAPAR(nshot, ipl_sign, Te_lav, 
-                                       ne_lav, np.abs(self.tot['IpiFP'])*1.e-6, \
+                                       self.tot['ne_lav'], np.abs(self.tot['IpiFP'])*1.e-6, \
                                        EdivA, self.tot['peak'], self.tot['Zeff'], jsrc)
 
                             self.tth['CX_LOSS' ] += pnbi*loss.cx
@@ -651,7 +679,7 @@ class ex_toth:
 
 # Greenwald density
 
-            self.tot['n/nGW'] = 1.e5*np.pi*self.tot['H-1_corr']*self.tot['ahor']**2/self.tot['IpiFP']
+            self.tot['n/nGW'] = 1.e5*np.pi*self.tot['ne_lav']*self.tot['ahor']**2/self.tot['IpiFP']
             ind = np.where(self.tot['ahor'] <= 0.05)
             self.tot['n/nGW'][ind] = 0
 
@@ -667,7 +695,7 @@ class ex_toth:
                 tauscal[law] = np.zeros_like(ttot)
                 tauscal[law] += parms['coeff']*np.power(ion_mass, parms['A'])
 
-                for sig in ('IpiFP', 'Rgeo', 'ahor', 'kappa', 'karea', 'P_TOT', 'H-1_corr', 'BTF', 'P_NET'):
+                for sig in ('IpiFP', 'Rgeo', 'ahor', 'kappa', 'karea', 'P_TOT', 'ne_lav', 'BTF', 'P_NET'):
                     sig_fac = 1
                     if sig in ('IpiFP', 'P_TOT', 'P_NET'):
                         sig_fac = 1.e-6
@@ -829,14 +857,8 @@ class ex_toth:
 
 # Final settings
 
-            self.tth['TOT_file']['expr'] = exp_write
-            self.tth['TOT_file']['edition'] = -1
-            if sf.Open('TOT', nshot):
-                print('TOT edition used for TTH: %d' %sf.edition)
-                self.tth['TOT_file']['edition'] = sf.edition
-
-            self.tot['H-1_corr'] *= 1e19
-            self.tot['H-4_corr'] *= 1e19
+            for jdcn in range(n_dcn):
+                self.tot['H-%d_corr' %jdcn] *= 1e19
 
 # Delete some entries
 

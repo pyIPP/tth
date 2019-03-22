@@ -163,6 +163,17 @@ class TOTH:
 #---
         locframe = ttk.Frame(rbframe)
         locframe.pack(side=tk.TOP, anchor=tk.W, pady=ypad)
+        ttk.Label(locframe, text='ne sig').pack(side=tk.LEFT, anchor=tk.W, padx=xpad)
+
+        key = 'ne_sig'
+        self.toth_d[key] = tk.StringVar()
+        self.toth_d[key].set('H-0')
+        for val in ('H-0', 'H-1'):
+           ttk.Radiobutton(locframe, variable=self.toth_d[key], \
+                value=val, text=val).pack(side=tk.LEFT, anchor=tk.W)
+#---
+        locframe = ttk.Frame(rbframe)
+        locframe.pack(side=tk.TOP, anchor=tk.W, pady=ypad)
         ttk.Label(locframe, text='Force TOT').pack(side=tk.LEFT, anchor=tk.W, padx=xpad)
 
         key = 'force_tot'
@@ -233,15 +244,15 @@ class TOTH:
                     status = ww_20180130.write_sf(self.nshot, self.toth.tot, sfhdir, \
                              'TOT', exp=exp_write)
 
-                self.toth.tth['TOT_file']['edition'] = -1
-                if sf.Open('TOT', self.nshot):
+                self.toth.tth['TOT_file']['expr']    = exp_write
+                if sf.Open('TOT', self.nshot, experiment=exp_write):
                     print('\nTOT edition used for TTH: %d\n' %sf.edition)
                     self.toth.tth['TOT_file']['edition'] = sf.edition
                     sf.Close()
 # TTH
-                if force_tth or sfdiff.sfdiff(self.nshot, exp_write, 'TTH', self.toth.tth):
-                    status = ww_20180130.write_sf(self.nshot, self.toth.tth, sfhdir, \
-                             'TTH', exp=exp_write)
+                    if force_tth or sfdiff.sfdiff(self.nshot, exp_write, 'TTH', self.toth.tth):
+                        status = ww_20180130.write_sf(self.nshot, self.toth.tth, sfhdir, \
+                                 'TTH', exp=exp_write)
             else:
                 print('No data to store')
         else:
