@@ -1,6 +1,3 @@
-import sys
-sys.path.append('/afs/ipp/aug/ads-diags/common/python/lib')
-
 import numpy as np
 import map_equ_20161123
 

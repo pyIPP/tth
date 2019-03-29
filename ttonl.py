@@ -1,10 +1,9 @@
 import os, sys
 sys.path.append('/afs/ipp/aug/ads-diags/common/python/lib/')
-sys.path.append('/afs/ipp/home/g/git/python/repository')
-import any_shot_today
+
 import time
-import dd_20180130
-import sftth
+from dd_20180130 import LastShotNr
+import sftth, any_shot_today
 
 firstshot = False
 # On a non-shotday the loop is terminated by the crontab final time (7 p.m.)
@@ -27,7 +26,7 @@ if any_shot_today.anyshot():
         print('Waiting for next shot')
         print('ctrl+c to terminate the script')
         try:
-            lastshot = dd_20180130.LastShotNr()
+            lastshot = LastShotNr()
             flag = True
         except:
             print('Problems reading last shot number')

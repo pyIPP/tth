@@ -1,6 +1,3 @@
-import sys
-sys.path.append('/afs/ipp/aug/ads-diags/common/python/lib')
-
 import numpy as np
 import map_equ_20161123
 
@@ -54,6 +51,8 @@ def chord_len(nshot, diag='EQH', dcn_ch=None):
 
 if __name__ == '__main__':
 
+    import sys
+    sys.path.append('/afs/ipp/aug/ads-diags/common/python/lib/')
     import matplotlib.pylab as plt
     import dd_20140407
 

@@ -1,10 +1,8 @@
-import sys
-sys.path.append('/afs/ipp/home/g/git/python/repository')
 import numpy as np
 import fconf
 import Tkinter as tk
 import ttk
-import sfh_20170404
+import sfh_20170404 # leave this older version
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
 from matplotlib.figure import Figure
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter

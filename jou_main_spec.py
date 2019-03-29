@@ -1,5 +1,3 @@
-import sys
-sys.path.append('/afs/ipp/aug/ads-diags/common/python/lib')
 import journal, dd_20180130
 import jou_main_spec
 

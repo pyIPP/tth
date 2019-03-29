@@ -1,5 +1,3 @@
-import sys
-sys.path.append('/afs/ipp/aug/ads-diags/common/python/lib')
 import numpy as np
 import dd_20180130
 
@@ -48,6 +46,8 @@ class IOC_FLUX:
 if __name__ == '__main__':
 
     import matplotlib.pylab as plt
+    import sys
+    sys.path.append('/afs/ipp/aug/ads-diags/common/python/lib')
 
 #    nshot = 18863
     nshot = 33804

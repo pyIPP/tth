@@ -1,9 +1,8 @@
 import os, sys
 sys.path.append('/afs/ipp/aug/ads-diags/common/python/lib/')
-sys.path.append('/afs/ipp/home/g/git/python/repository')
-import sfdiff
+
 import dd_20180130, ww_20180130
-import exec_toth
+import exec_toth, sfdiff
 
 sf = dd_20180130.shotfile()
 

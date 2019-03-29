@@ -9,7 +9,6 @@ __version__ = '2.0'
 __date__    = '06.03.2012'
 
 import os, sys
-sys.path.append('/afs/ipp/home/g/git/python/repository')
 sys.path.append('/afs/ipp/aug/ads-diags/common/python/lib')
 try:
     import Tkinter as tk
