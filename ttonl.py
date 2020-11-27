@@ -3,7 +3,7 @@ sys.path.append('/afs/ipp/aug/ads-diags/common/python/lib/')
 
 import time
 from dd_20180130 import LastShotNr
-import sftth, any_shot_today
+import wr_sf, any_shot_today
 
 firstshot = False
 # On a non-shotday the loop is terminated by the crontab final time (7 p.m.)
@@ -39,7 +39,7 @@ if any_shot_today.anyshot():
                 toth_d['shot'] = nshot
                 w_tth = (nshot < lastshot)
                 try:
-                    sftth.write_tot_tth(toth_d, w_tth=w_tth)
+                    wr_sf.write_tot_tth(toth_d, w_tth=w_tth)
                 except:
                     print('Problems executing TOTH')
 

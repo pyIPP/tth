@@ -174,54 +174,35 @@ class INPUT:
                     yerr[jt, :] = yerr[jt, ind_sort[jt]]
 # Fit
 
+
                 if fit_d[prefix] == 'rec_spl':
                     timeout_pool = 10
                 else:
                     timeout_pool = 200
 
-                if True:
-#                try:
-                    print('Fitting', sfl_d[prefix])
-                    if prefix in ('E', 'N'):
-                        fit_tol = 0.
-                    else:
-                        fit_tol = gpar.fit_tol
+                print('Fitting', sfl_d[prefix])
+                if prefix in ('E', 'N'):
+                    fit_tol = 0.
+                else:
+                    fit_tol = gpar.fit_tol
+
+                try:
                     pool = Pool(cpu_count())
                     out = pool.map_async(fit1d, [(xexp[jt], yexp[jt], yerr[jt], \
-                        x_fit, fit_tol, gpar.sigmas, fit_d[prefix]) \
-                        for jt in range(nt)]).get(timeout_pool)
+                      x_fit, fit_tol, gpar.sigmas, fit_d[prefix]) \
+                      for jt in range(nt)]).get(timeout_pool)
                     pool.close()
                     pool.join()
         
                     probj = PROF()
-                    if prefix != 'V':
-                        probj.fit_rhop = np.maximum(np.array(out)[:, :n_spl],1e-3)
-                    else:
-                        probj.fit_rhop = np.array(out)[:, :n_spl]
+                    probj.fit_rhop = np.array(out)[:, :n_spl]
                     probj.sflists  = sorted(red_data.keys())
                     probj.fit_method = fit_d[prefix]
                     probj.tnot = []
                     probj.units = red_data[probj.sflists[0]]['unit']
                     self.profiles.prof[prefix] = probj
-
-#                except:
-#                    print('\n\n Could not fit ', sfl_d[prefix], '\n\n')
-
-            else:
-
-                print('\n Prefix %s not selected \n' %prefix)
-
-                if prefix == 'V':
-
-                    probj = PROF()
-                    probj.fit_rhop = 0*np.array(out)[:, :n_spl]
-                    probj.sflists  = sorted(red_data.keys())
-                    probj.fit_method = fit_d[prefix]
-                    probj.tnot = []
-                    probj.units = 'rad/s'
-                    self.profiles.prof[prefix] = probj
-
-                    print('V array: ', self.profiles.prof[prefix].fit_rhop)
+                except:
+                    print('Problems fitting prefix %s' %prefix)
 
         if 'I' not in self.profiles.prof:
 

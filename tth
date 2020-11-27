@@ -22,5 +22,5 @@ endif
 setenv GSLCONTRIB_LIB /afs/ipp/home/g/git/gsl_contrib/lib/libgsl-contrib.so
 setenv LD_LIBRARY_PATH /afs/@cell/common/soft/gsl/2.1/amd64_sles11/gcc-4.8/lib 
 
-cd $HOME/python/tau
+cd /afs/ipp/home/g/git/python/tau
 python toth_gui.py

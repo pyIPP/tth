@@ -27,3 +27,30 @@ def write_tot_tth(toth_d, w_tth=True):
 
             if w_tth and sfdiff.sfdiff(nshot, toth_d['out_exp'], 'TTH', toth.tth):
                 ww_20180130.write_sf(nshot, toth.tth, sfhdir, 'TTH', exp=toth_d['out_exp'])
+
+def write_ttr(toth_d):
+
+    nshot = toth_d['shot']
+    try:
+        toth = exec_toth.ex_toth(nshot, toth_d, rb_run=False)
+    except:
+        print('TOT/TTH not executed')
+        return
+
+    sfhdir = os.path.dirname(os.path.realpath(__file__))
+
+    ttr_d = {}
+# unify tot and tth in ttr
+    for key, val in toth.tot.items():
+        ttr_d[key] = val 
+    
+    for key, val in toth.tth.items():
+        if key != 'TOT_file':
+            ttr_d[key] = val 
+
+    if 'time' in ttr_d.keys():
+        if sfdiff.sfdiff(nshot, toth_d['out_exp'], 'TTR', ttr_d):
+            ww_20180130.write_sf(nshot, ttr_d, sfhdir, 'TTR', exp=toth_d['out_exp'])
+    else:
+        print('Time missing in ttr_d keys')
+        print(ttr_d.keys())
