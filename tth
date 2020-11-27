@@ -2,20 +2,25 @@
 
 setenv osy `fs sysname | awk -F\' '{print $2}'`
 
-if ($osy == 'amd64_sles11' || $osy == 'amd64_linux26') then
+if ($osy == 'amd64_sles11' || $osy == 'amd64_linux26' || $osy == 'amd64_sles15') then
 
    source /etc/profile.d/modules.csh
    module purge
    if ($osy == 'amd64_sles11') then
       module load anaconda/2_4.1.1
-   else
+   else if ($osy == 'amd64_linux26') then
       module load anaconda/2_4.2.0
+   else
+      module load anaconda/2/5.1
    endif
 else
 
   alias python /usr/ads/diags/python2.7/bin/python2.7
 
 endif
+
+setenv GSLCONTRIB_LIB /afs/ipp/home/g/git/gsl_contrib/lib/libgsl-contrib.so
+setenv LD_LIBRARY_PATH /afs/@cell/common/soft/gsl/2.1/amd64_sles11/gcc-4.8/lib 
 
 cd $HOME/python/tau
 python toth_gui.py

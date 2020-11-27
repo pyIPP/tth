@@ -16,6 +16,7 @@ try:
 except:
     import tkinter as tk
     from tkinter import ttk
+    from tkinter import font as tkFont
 import numpy as np
 import matplotlib.pylab as plt
 import tkhyper, sfdiff
@@ -156,7 +157,7 @@ class TOTH:
         key = 'ne_diag'
         self.toth_d[key] = tk.StringVar()
         self.toth_d[key].set('DCK')
-        for val in ('DCK', 'DCN', 'DCR', 'DCP', 'DCS'):
+        for val in ('DCK', 'DCN', 'DCR', 'DCP', 'DCS', 'DCT'):
            ttk.Radiobutton(locframe, variable=self.toth_d[key], \
                 value=val, text=val).pack(side=tk.LEFT, anchor=tk.W)
 #---
@@ -167,37 +168,24 @@ class TOTH:
         key = 'ne_sig'
         self.toth_d[key] = tk.StringVar()
         self.toth_d[key].set('H-0')
-        for val in ('H-0', 'H-1'):
+        for val in ('H-0', 'H-1', 'nedl_H1', 'neBRT_H1'):
            ttk.Radiobutton(locframe, variable=self.toth_d[key], \
                 value=val, text=val).pack(side=tk.LEFT, anchor=tk.W)
-#---
-        locframe = ttk.Frame(rbframe)
-        locframe.pack(side=tk.TOP, anchor=tk.W, pady=ypad)
-        ttk.Label(locframe, text='Force TOT').pack(side=tk.LEFT, anchor=tk.W, padx=xpad)
 
-        key = 'force_tot'
-        self.toth_d[key] = tk.BooleanVar()
-        self.toth_d[key].set(False)
-        ttk.Checkbutton(locframe, variable=self.toth_d[key]).pack(side=tk.LEFT, anchor=tk.W)
-#---
-        locframe = ttk.Frame(rbframe)
-        locframe.pack(side=tk.TOP, anchor=tk.W, pady=ypad)
-        ttk.Label(locframe, text='Force TTH').pack(side=tk.LEFT, anchor=tk.W, padx=xpad)
+#--- Checkbuttons
+        keys = ['rb_wfi', 'rb_run', 'force_ttr', 'force_tot', 'force_tth', 'sf_write']
+        key_txt = {'rb_wfi': 'RABBIT Wfi', 'rb_run': 'RABBIT new run', \
+            'force_ttr': 'Force TTR', 'force_tot': 'Force TOT', 'force_tth': 'Force TTH', \
+            'sf_write': 'Auto SF-write'}
+        for key in keys:
+            txt = key_txt[key]
+            locframe = ttk.Frame(rbframe)
+            locframe.pack(side=tk.TOP, anchor=tk.W, pady=ypad)
+            ttk.Label(locframe, text=txt).pack(side=tk.LEFT, anchor=tk.W, padx=xpad)
 
-        key = 'force_tth'
-        self.toth_d[key] = tk.BooleanVar()
-        self.toth_d[key].set(False)
-        ttk.Checkbutton(locframe, variable=self.toth_d[key]).pack(side=tk.LEFT, anchor=tk.W)
-
-#---
-        locframe = ttk.Frame(rbframe)
-        locframe.pack(side=tk.TOP, anchor=tk.W, pady=ypad)
-        ttk.Label(locframe, text='Auto SF-write').pack(side=tk.LEFT, anchor=tk.W, padx=xpad)
-
-        key = 'sf_write'
-        self.toth_d[key] = tk.BooleanVar()
-        self.toth_d[key].set(False)
-        ttk.Checkbutton(locframe, variable=self.toth_d[key]).pack(side=tk.LEFT, anchor=tk.W)
+            self.toth_d[key] = tk.BooleanVar()
+            self.toth_d[key].set(False)
+            ttk.Checkbutton(locframe, variable=self.toth_d[key]).pack(side=tk.LEFT, anchor=tk.W)
 
         tothframe.mainloop()
 
@@ -233,28 +221,45 @@ class TOTH:
     def write_sf(self):
 
         if hasattr(self, 'toth'):
+
             force_tot = self.toth_d['force_tot'].get()
             force_tth = self.toth_d['force_tth'].get()
+            force_ttr = self.toth_d['force_ttr'].get()
+            rb_wfi = self.toth_d['rb_wfi'].get()
             sfhdir = os.path.dirname(os.path.realpath(__file__))
+
             if 'time' in self.toth.tot.keys():
                 exp_write = self.toth_d['out_exp'].get().strip()
+                if rb_wfi: #RABBIT shotfile
+                    ttr_d = {}
+    # unify tot and tth in ttr
+                    for key, val in self.toth.tot.items():
+                        ttr_d[key] = val 
+                    for key, val in self.toth.tth.items():
+                        if key != 'TOT_file':
+                            ttr_d[key] = val
+                    if force_ttr or sfdiff.sfdiff(self.nshot, exp_write, 'TTR', ttr_d):
+                        ww_20180130.write_sf(self.nshot, ttr_d, sfhdir, 'TTR', exp=exp_write)
 # TOT
-                if force_tot or sfdiff.sfdiff(self.nshot, exp_write, 'TOT', self.toth.tot):
-                    status = ww_20180130.write_sf(self.nshot, self.toth.tot, sfhdir, \
+                else:
+                    if force_tot or sfdiff.sfdiff(self.nshot, exp_write, 'TOT', self.toth.tot):
+                        ww_20180130.write_sf(self.nshot, self.toth.tot, sfhdir, \
                              'TOT', exp=exp_write)
 
-                self.toth.tth['TOT_file']['expr']    = exp_write
-                if sf.Open('TOT', self.nshot, experiment=exp_write):
-                    print('\nTOT edition used for TTH: %d\n' %sf.edition)
-                    self.toth.tth['TOT_file']['edition'] = sf.edition
-                    sf.Close()
+                    self.toth.tth['TOT_file']['expr'] = exp_write
+                    if sf.Open('TOT', self.nshot, experiment=exp_write):
+                        print('\nTOT edition used for TTH: %d\n' %sf.edition)
+                        self.toth.tth['TOT_file']['edition'] = sf.edition
+                        sf.Close()
 # TTH
-                    if force_tth or sfdiff.sfdiff(self.nshot, exp_write, 'TTH', self.toth.tth):
-                        status = ww_20180130.write_sf(self.nshot, self.toth.tth, sfhdir, \
+                        if force_tth or sfdiff.sfdiff(self.nshot, exp_write, 'TTH', self.toth.tth):
+                            status = ww_20180130.write_sf(self.nshot, self.toth.tth, sfhdir, \
                                  'TTH', exp=exp_write)
             else:
                 print('No data to store')
+
         else:
+
             print('Run code before Storing shotfiles')
 
 

@@ -4,7 +4,7 @@ import dd_20180130
 sf  = dd_20180130.shotfile()
 
 dcn_sig = { 'DCS': 'nedl_H1', 'DCK': 'H-1', \
-            'DCN': 'H-1', 'DCR': 'H-1', 'DCP': 'H-1'}
+            'DCN': 'H-1', 'DCR': 'H-1', 'DCP': 'H-1', 'DCT': 'H-1'}
 
 def fringe_jumps(time_in, sig_in, flattop_end):
 
@@ -51,10 +51,13 @@ def dc_jump(nshot, diag_in, sig_in=None, flattop_end=10., exp_in='AUGD', ed_in=0
 
     if diag_in not in dcn_sig.keys():
         print('Diag %s not supported' %diag_in)
-        return tjump_dc, ne_ed
+        return None, None, None
 
     if sf.Open(diag_in, nshot, experiment=exp_in, edition=ed_in):
         tdcn = sf.GetTimebase(ne_sig)
+        if tdcn is None:
+            print('Sig %s:%s not found' %(diag_in, ne_sig))
+            return None, None, None
         dcn_ref = sf.GetSignal(ne_sig, cal=True)
         ne_ed = sf.edition
         sf.Close()
@@ -66,6 +69,7 @@ def dc_jump(nshot, diag_in, sig_in=None, flattop_end=10., exp_in='AUGD', ed_in=0
     else:
         print('Shotfile %s not found for #%d' %(diag_in, nshot))
 
+    print('DC_JUMP', ne_sig, ne_ed, ed_in)
     return tjump_dc, ne_sig, ne_ed
 
 
@@ -81,9 +85,11 @@ def ne_fringe(nshot, flattop_end=10., exp_in='AUGD', diag_in='DCK', sig_in='H-1'
     ne_diag = diag_in
     ne_exp  = exp_in
     ne_ed   = ed_in
-    if ne_diag == 'DCS':
-        sig_in = 'nedl_H1'
+#    if ne_diag == 'DCS':
+#        sig_in = 'nedl_H1'
     tjump_dc, dcn_sig, dcn_ed = dc_jump(nshot, ne_diag, sig_in=sig_in, flattop_end=flattop_end, exp_in=ne_exp, ed_in=ne_ed)
+    if tjump_dc is None:
+        return None
     if (dcn_ed is not None) and (tj_forced is not None):
         tjump_dc = tj_forced
 

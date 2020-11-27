@@ -1,20 +1,26 @@
 import numpy as np
 import fconf
-import Tkinter as tk
-import ttk
-import sfh_20170404 # leave this older version
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
+try:
+    import Tkinter as tk
+    import ttk
+except:
+    import tkinter as tk
+    from tkinter import ttk
+from sfh_20200703 import SFH_READ
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+try:
+    from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk as nt2tk
+except:
+    from matplotlib.backends.backend_tkagg import NavigationToolbar2TkAgg as nt2tk
 from matplotlib.figure import Figure
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter
-
-sfhr = sfh_20170404.SFH_READ
 
 col = 2*['#c00000', '#00c000', '#0000c0', '#b0b000', '#b000b0', '#00b0b0']
 fsize = 8
 titsize=10
 lblsize=10
 
-tth_laws = ( \
+taulaws = [ \
     'ITERL-89P(tot)', \
     'ITERL-96P(th)', \
     'ITERH92PY:tau_E', \
@@ -25,9 +31,12 @@ tth_laws = ( \
     'ITERH-98P(y, th, 2)', \
     'ESGB, McDonald', \
     'CORDEY05, NF 45', \
-    'KARDAUN, IAEA 2006' \
-#                'KARDAUN-LANG, IAEA 2012, EX/P4-01' \
-                 )
+    'KARDAUN, IAEA 2006']
+
+lhlaws = [ \
+    'ITPA Threshold Power Scaling 2007 (Plasma Surface S)', \
+    'ITPA Threshold Power Scaling 2007 (Rgeo and ahor)']
+
 
 def fig_plot(frame, dic, nshot, sig_list, y_ticks=[], col='#c00000', n_rows=5, n_cols=7):
 
@@ -50,6 +59,9 @@ def fig_plot(frame, dic, nshot, sig_list, y_ticks=[], col='#c00000', n_rows=5, n
     n_cols = int(n_plots/n_rows + 0.5) + 1
     jrow = 0
     for jx, sig in enumerate(sig_list):
+        if sig not in dic.keys():
+            print('Signal %s not in dictionary' %sig)
+            continue
         ax = fig.add_subplot(n_rows, n_cols, jx+1)
         ax.plot(dic['time'], dic[sig], color=col)
         ax.text(.5, .9, sig, ha='center', transform=ax.transAxes, fontsize=titsize)
@@ -71,14 +83,15 @@ def fig_plot(frame, dic, nshot, sig_list, y_ticks=[], col='#c00000', n_rows=5, n
                 tick.label.set_fontsize(fsize) 
             ax.set_xlabel('Time [s]', fontsize=lblsize)
 
-    ax.tick_params(which='major', length=4, width=0.5)
+    if ax in locals():
+        ax.tick_params(which='major', length=4, width=0.5)
 
     can.mpl_connect('button_press_event', fconf.on_click)
-    toolbar = NavigationToolbar2TkAgg(can, frame)
+    toolbar = nt2tk(can, frame)
     toolbar.update()
 
 
-def fig_plot2(frame, time, sgr, nshot, col='#c00000', n_rows=5, n_cols=7, ymax=2):
+def fig_plot2(frame, time, sgr, nshot, col='#c00000', n_rows=5, n_cols=7, ymax=2, laws=taulaws):
 
     figframe  = tk.Frame(frame)
     figframe.pack(side=tk.TOP, fill=tk.X)
@@ -89,18 +102,18 @@ def fig_plot2(frame, time, sgr, nshot, col='#c00000', n_rows=5, n_cols=7, ymax=2
     fig.subplots_adjust(left=0.1, bottom=0.06, right=0.95, top=0.92, hspace=0)
     fig.text(.5, .95, '#%d' %nshot, ha='center')
 
-    print sgr.shape
+    print(sgr.shape)
     n_sig = sgr.shape[1]
     for jx in range(n_sig):
         ax = fig.add_subplot(n_rows, n_cols, jx+1)
         ax.plot(time, sgr[:, jx], color=col)
         ax.plot([0, 10], [1, 1], 'k-')
-        ax.set_ylabel(tth_laws[jx], fontsize=fsize)
+        ax.set_ylabel(laws[jx], fontsize=fsize)
         ax.set_ylim([0, ymax])
         if int(jx/n_cols) == n_rows-1:
             ax.set_xlabel('Time [s]', fontsize=fsize)
     can.mpl_connect('button_press_event', fconf.on_click)
-    toolbar = NavigationToolbar2TkAgg(can, frame)
+    toolbar = nt2tk(can, frame)
     toolbar.update()
 
 
@@ -128,12 +141,12 @@ def plot_toth(nshot, toth):
 
 # TOT signals
 
-        tot_list = sfhr('TOT').sig
+        tot_list = SFH_READ('TOT').sig
         fig_plot(totframe, toth.tot, nshot, tot_list, col=col[0])
 
 # TTH signals
 
-        tth_list = sfhr('TTH').sig
+        tth_list = SFH_READ('TTH').sig
         fig_plot(tthframe, toth.tth, nshot, tth_list, col=col[0])
 
 # H-factors
@@ -142,6 +155,6 @@ def plot_toth(nshot, toth):
 
 # L2H-factors
 
-        fig_plot2(lh_frame, toth.tth['time'], toth.tth['L2H_facs'], nshot, col=col[0], n_rows=4, n_cols=3, ymax=3)
+        fig_plot2(lh_frame, toth.tth['time'], toth.tth['L2H_facs'], nshot, col=col[0], n_rows=4, n_cols=3, ymax=3, laws=lhlaws)
 
         myframe.mainloop()

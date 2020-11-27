@@ -1,25 +1,16 @@
-import journal, dd_20180130
-import jou_main_spec
+import dd_20180130 as dd
 
-sf = dd_20180130.shotfile()
+sf = dd.shotfile()
 
-def  extract_main(gasv_str):
+def  extract_main(gasv):
 
+    gasv_str = gasv.decode('utf-8') if isinstance(gasv, bytes) else gasv
     main_spec = 'D'
     if '(1)' in gasv_str:
         main_spec = gasv_str.split('(1)')[0].split(':')[-2].split(',')[-1].strip()
     elif gasv_str.count(':') == 1:
         main_spec = gasv_str.split(':')[0].strip()
     return main_spec
-
-def spec_jou_db(nshot):
-
-    val = journal.getEntryForShot(nshot)
-    if (val['typ'] != 'plasma') or (val['useful'] != 'yes'):
-        return None
-
-    return extract_main(val['gasvalv'])
-
 
 def spec_jou_sf(nshot):
 

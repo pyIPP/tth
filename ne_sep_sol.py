@@ -1,8 +1,8 @@
 import neut_flux
 import numpy as np
-import dd_20140407
+import dd_20180130
 
-sf  = dd_20140407.shotfile()
+sf  = dd_20180130.shotfile()
 
 
 class NE_SEP_SOL:
@@ -53,7 +53,7 @@ class NE_SEP_SOL:
                         (ind_lid_zero, ) = np.where(dlid[sig] == 0)
 # Where ne_sol or ne_sep is zero, replace by DLP value at the same time
                         for jt in ind_lid_zero:
-                            print 'tlid jt', tlid[jt]
+                            print('tlid jt', tlid[jt])
                             if (tlid[jt] == tdlp.any()):
                                 jtim = np.min(np.where(tdlp == tlid[jt]))
                                 dlid[sig][jt] = ddlp[sig][jtim]

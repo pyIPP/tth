@@ -15,7 +15,7 @@ def write_tot_tth(toth_d, w_tth=True):
         print('TOT/TTH not executed')
         return
     sfhdir = os.path.dirname(os.path.realpath(__file__))
-    if 'time' in toth.tot.iterkeys():
+    if 'time' in toth.tot.keys():
         if sfdiff.sfdiff(nshot, toth_d['out_exp'], 'TOT', toth.tot):
             ww_20180130.write_sf(nshot, toth.tot, sfhdir, 'TOT', exp=toth_d['out_exp'])
 

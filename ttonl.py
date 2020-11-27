@@ -13,8 +13,9 @@ while not firstshot:
         time.sleep(60)
 
 toth_d = {'equ_exp': 'AUGD', 'equ_dia':'GQH', 'equ_ed': 0, \
-          'out_exp': 'AUGD', 'NBIpar':'TRANSP 2012', 't_fringe': 0.,\
-          'ne_exp': 'AUGD', 'ne_diag': 'DCK', 'ne_sig': 'H-0', 'ne_ed': 0}
+          'out_exp': 'AUGD', 'NBIpar':'TRANSP 2012', 't_fringe': 0., \
+          'ne_exp': 'AUGD', 'ne_diag': 'DCK', 'ne_sig': 'H-0', 'ne_ed': 0, \
+          'rabbit': False, 'rb_run': False}
 
 if any_shot_today.anyshot():
 

@@ -4,16 +4,20 @@ import scipy.ndimage
 import NBIlosses, tderiv, wfi, ne_fringe, dcn_chords, ne_sep_sol
 import dd_20180130, jou_main_spec
 
+import rabbit, rb_io, write_rabbit
+
 sf = dd_20180130.shotfile()
 
 
-parlaws = { \
+hpar_d = { \
     'prefac':'coeff', 'a_i':'A', 'Ip':'IpiFP', 'P_tot':'P_TOT', 'P_net':'P_NET', \
     'Rgeo':'Rgeo', 'ahor':'ahor', 'kappa':'kappa', 'karea':'karea', \
     '<ne>_H-1':'ne_lav', 'Btf':'BTF' \
                 }
+lh_d = {'prefac':'coeff', 'Rgeo':'Rgeo', 'ahor':'ahor', '<ne>_H-1':'ne_lav', \
+        'Btf':'BTF', 'S': 'Surface'}
 
-laws = { \
+tau_laws = { \
     'ITERL-89P(tot), Wtot/Ptot': \
         {'scalmod': 'tau_tot', 'coeff':0.038, 'A':0.5, 'IpiFP':0.85, 'P_TOT':-0.5, 'P_NET':0,            \
          'Rgeo':1.2, 'ahor':0.3, 'kappa':0.5, 'karea':0, 'ne_lav':0.1, 'BTF':0.2},            \
@@ -49,7 +53,7 @@ laws = { \
          'Rgeo':0, 'ahor':0, 'kappa':0, 'karea':0, 'ne_lav':0, 'BTF':0}        \
 }
 
-tth_laws = ( \
+taulaws = [ \
     'ITERL-89P(tot), Wtot/Ptot', \
     'ITERL-96P(th), Wth/Pnet', \
     'ITERH92PY:tau_E, ELMy, Wtot/Pnet', \
@@ -60,9 +64,34 @@ tth_laws = ( \
     'ITERH-98P(y, th, 2), ELMy, Wth/Pnet', \
     'DS03 or ESGB, McDonald, ppcf 46 (2004) A215 equation 11', \
     'CORDEY05, NF 45 (2005) 1078, equation 9', \
-    'KARDAUN, IAEA 2006, IT/P10' )
+    'KARDAUN, IAEA 2006, IT/P10' ]
 #     'KARDAUN-LANG, IAEA 2012, EX/P4-01' \
 
+
+lh_laws = { \
+     'ITPA Threshold Power Scaling 2007 (Plasma Surface S)': \
+     {'prefac':0.0488, 'Rgeo':0, 'ahor':0, 'S':0.941, '<ne>_H-1':0.717, 'Btf':0.803}, \
+     'ITPA Threshold Power Scaling 2007 (Rgeo and ahor)': \
+     {'prefac':2.150, 'Rgeo':0.999, 'ahor':0.975, 'S':0, '<ne>_H-1':0.782, 'Btf':0.772} \
+}
+
+lhlaws = [ \
+    'ITPA Threshold Power Scaling 2007 (Plasma Surface S)', \
+    'ITPA Threshold Power Scaling 2007 (Rgeo and ahor)']
+
+Ggw_laws = { \
+    'ITERH-98P(y, th, 2), ELMy, Wth/Pnet': \
+    {'prefac':35.5, 'G_H_exp':3.23, 'G_bn_exp':-1.23, 'G_q_exp':-3.1}, \
+    'DS03 or ESGB, McDonald, ppcf 46 (2004) A215 equation 11': \
+    {'prefac':22.8, 'G_H_exp':2.22, 'G_bn_exp':-0.22, 'G_q_exp':-2.71}, \
+    'CORDEY05, NF 45 (2005) 1078, equation 9': \
+    {'prefac':6.07, 'G_H_exp':1.82, 'G_bn_exp':0.18, 'G_q_exp':-2.22} \
+}
+
+Ggwlaws = [ \
+    'ITERH-98P(y, th, 2), ELMy, Wth/Pnet', \
+    'DS03 or ESGB, McDonald, ppcf 46 (2004) A215 equation 11', \
+    'CORDEY05, NF 45 (2005) 1078, equation 9']
 
 #-----------------------
 def msg_quit(nshot, msg):
@@ -103,7 +132,7 @@ def sig2toth(ttot, nshot, diag, sig, exp='AUGD', ed=0, min_zero=0.01):
             if tdiag is None:
                 return d_out
             diag_sig = sf.GetSignal(sig, cal=True)
-            print np.max(diag_sig), len(diag_sig), len(tdiag)
+            print(np.max(diag_sig), len(diag_sig), len(tdiag))
             if len(tdiag) == len(diag_sig):
                 diag_sig = np.nan_to_num(diag_sig)
                 d_out    = np.interp(ttot, tdiag, diag_sig, left=0, right=0)
@@ -134,6 +163,9 @@ class ex_toth:
             need    = int(toth_d['ne_ed'])
             exp_write = toth_d['out_exp'].strip()
             NBIpar = toth_d['NBIpar'].strip()[:6]
+            rb_wfi = toth_d['rb_wfi']
+            rb_run = toth_d['rb_run']
+
             t_fr = float(toth_d['t_fringe'])
             if t_fr == 0.:
                 t_fr = None
@@ -141,6 +173,7 @@ class ex_toth:
             home_dir = os.getenv('HOME')
             os.system('mkdir -p '+home_dir+'/shotfiles/TOT')
             os.system('mkdir -p '+home_dir+'/shotfiles/TTH')
+            os.system('mkdir -p '+home_dir+'/shotfiles/TTR')
 
             n_source = {}
             n_source['NBI'] = 8
@@ -248,6 +281,9 @@ class ex_toth:
             flattop_equ_end = min(tequ[-1], flattop_end)
             self.tot['Fringe'] = ne_fringe.ne_fringe(nshot, flattop_end=flattop_equ_end, \
                 exp_in=neexp, diag_in=nediag, sig_in=nesig, ed_in=need, tj_forced=t_fr)
+            if self.tot['Fringe'] is None:
+                msg_quit(nshot, 'Error with ne diagsnotics')
+                return
 
             print('Time of fringe jump: %8.4f' %self.tot['Fringe']['tjump'])
 
@@ -259,7 +295,7 @@ class ex_toth:
             print('\nT_end is min of %8.4f, %8.4f, %8.4f' %(ttot_full[-1], tequ[-1], self.tot['Fringe']['tjump']) )
             nttot = np.where(ttot_full < t_end)[0][-1]
 
-            print 'nttot', nttot
+            print('nttot', nttot)
             ttot = ttot_full[:nttot]
             self.tot['time'] = ttot
             self.tth['time'] = ttot
@@ -279,16 +315,17 @@ class ex_toth:
             print('DC signal: %s:%s:%s(%d)' %(dcexp, dcdiag, dcsig, dced) )
 
             n_dcn = 6
-            ne_l_av = {}
+            self.tot['ne_lav'] = np.zeros_like(ttot)
 
             min_chord_len = 0.05
             for jdcn in range(n_dcn):
                 self.tot['H-%d_corr' %jdcn] = np.zeros_like(ttot)
-
             if dcdiag == 'DCS':
-                ne_h = sig2toth(ttot, nshot, dcdiag, dcsig, exp=dcexp)
-                offset_h = np.average(ne_h[0: 10])     # First 10 ms
-                self.tot['ne_lav'] = ne_h - offset_h # unit 10**19 m**-3
+                ne_h = sig2toth(ttot, nshot, dcdiag, dcsig, exp=dcexp, ed=dced)
+                ne_h *= 1e-19 # m**-3 -> 10**19 m**-3
+                offset_h = np.average(ne_h[0: 10]) # First 10 ms
+                print('OFFSET', offset_h)
+                self.tot['ne_lav'] = ne_h - offset_h
                 self.tot['peak'] = np.ones_like(ttot)
 
             else: # default
@@ -297,7 +334,7 @@ class ex_toth:
                 if len_h is None: # use map_equ, separatrix crossing
                     len_d = dcn_chords.chord_len(nshot, diag='EQH')
                     for jdcn in range(n_dcn):
-                        tmp = sig2toth(ttot, nshot, dcdiag, 'H-%d' %jdcn, exp=dcexp)
+                        tmp = sig2toth(ttot, nshot, dcdiag, 'H-%d' %jdcn, exp=dcexp, ed=dced)
                         if tmp is not None:
                             ne_h = 1e-19*tmp
                             offset_h = np.average(ne_h[0: 10]) # First 10 ms
@@ -307,7 +344,7 @@ class ex_toth:
                 else: # default, chord from GQH
 
                     for jdcn in range(n_dcn):
-                        tmp = sig2toth(ttot, nshot, dcdiag, 'H-%d' %jdcn, exp=dcexp)
+                        tmp = sig2toth(ttot, nshot, dcdiag, 'H-%d' %jdcn, exp=dcexp, ed=dced)
                         if tmp is not None:
                             ne_h = 1e-19*tmp
                             offset_h = np.average(ne_h[0: 10]) # First 10 ms
@@ -319,9 +356,9 @@ class ex_toth:
                                 self.tot['H-%d_corr' %jdcn] = (ne_h - offset_h)/len_h
 
                 if nesig == 'H-0':
-                    self.tot['ne_lav'] = self.tot['H-0_corr']
+                    self.tot['ne_lav'][:] = self.tot['H-0_corr'][:]
                 else:
-                    self.tot['ne_lav'] = self.tot['H-1_corr']
+                    self.tot['ne_lav'][:] = self.tot['H-1_corr'][:]
                 pf = self.tot['ne_lav']/self.tot['H-4_corr']
                 pf = np.maximum(pf, 0.8)
 
@@ -386,6 +423,7 @@ class ex_toth:
 #MAG
 #---
 
+
             sig = 'ULid12'
             if (nshot > 27404):
                 diag = 'MAY'
@@ -405,6 +443,19 @@ class ex_toth:
                     tmag = sf.GetTimebase(sig) 
                     ULid12 = np.interp(ttot, tmag, lid12)
                     sf.Close()
+
+            ulid_list = list(range(34437, 34451)) + list(range(34788, 34811)) + list(range(34855, 34866)) + \
+                        list(range(34988, 34996)) + [35215, 35216] + list(range(35234, 35252))
+            if nshot in ulid_list:
+                sig = 'ULa10'
+                diag = 'MAU'
+                if sf.Open(diag, nshot):
+                    lid12 = sf.GetSignal(sig, cal = True) 
+                    tmag = sf.GetTimebase(sig) 
+                    l12smo = scipy.ndimage.gaussian_filter1d(lid12, 10, axis = -1, order = 0, output = None, mode = 'reflect', cval = 0.)
+                    ULid12 = np.interp(ttot, tmag, l12smo)
+                    sf.Close()
+
             ind_base = (tmag >= -10) & (tmag <= -9)
             if np.sum(ind_base) > 1:
                 baseline = np.average(lid12[ind_base])
@@ -573,7 +624,8 @@ class ex_toth:
                 print('\nCalculating slowing down time')
 
                 indt = (pmhd > 100) & (self.tot['ne_lav'] > 0.01)
-                self.tth['Te_av'][indt]  = 0.2067*pmhd[indt]/self.tot['ne_lav'][indt]
+# git                self.tth['Te_av'][indt]  = 0.2067*pmhd[indt]/self.tot['ne_lav'][indt]
+                self.tth['Te_av'][indt]  = 0.28*pmhd[indt]/self.tot['ne_lav'][indt]
                 self.tth['Ec'][indt]     = 0.01865*self.tth['Te_av'][indt]
                 self.tth['tau_sp'][indt] = np.maximum(7.376*1e-6*np.power(self.tth['Te_av'][indt], 1.5), 0)/self.tot['ne_lav'][indt]
 
@@ -634,7 +686,8 @@ class ex_toth:
                             EdivA = dnis[pn]['UEXQ'][jnbi]/dnis[pn]['M']
                             self.tth['SOL_LOSS'] += pnbi*self.tth['NE_SOL']*1.e-19* \
                                      NBIlosses.solloss(nshot, pow_frac[pn], EdivA, jsrc)
-                            self.tth['RIP_LOSS'] += NBIlosses.riploss(nshot, jsrc)
+                            self.tth['RIP_LOSS'] += pnbi*NBIlosses.riploss(nshot, jsrc)
+                            pnbi_transp = pnbi - self.tth['SOL_LOSS']
                             if NBIpar == 'FAFNER':
                                 loss = NBIlosses.FAFPAR(nshot, pow_frac[pn], self.tot['ne_lav'], Te_lav, \
                                        self.tth['NE_SEP']*1e-19, tau_sd[:, jsrc], EdivA, jsrc)
@@ -644,19 +697,34 @@ class ex_toth:
                                        self.tot['ne_lav'], np.abs(self.tot['IpiFP'])*1.e-6, \
                                        EdivA, self.tot['peak'], self.tot['Zeff'], jsrc)
 
-                            self.tth['CX_LOSS' ] += pnbi*loss.cx
-                            self.tth['ORB_LOSS'] += pnbi*loss.orb
-                            self.tot['SHINE_TH'] += pnbi*loss.st
-                            twfi += pnbi*loss.wfi
+                            self.tth['CX_LOSS' ] += pnbi_transp*loss.cx
+                            self.tth['ORB_LOSS'] += pnbi_transp*loss.orb
+                            self.tot['SHINE_TH'] += pnbi_transp*loss.st
+                            twfi += pnbi_transp*loss.wfi
                         jsrc += 1
 
             tth_loss = np.zeros_like(ttot)
             for sig in ('SOL', 'ORB', 'CX', 'RIP'):
                 tth_loss += self.tth['%s_LOSS' %sig]
  
-# Modify Wfi retaining NBI switching
+# Wfi from RABBIT
 
-            self.tot['Wfi'] = wfi.wfi(twfi, self.tth['tau_sd'], dt)
+            if rb_wfi:
+                print('\nTaking Wfi from RABBIT!\n')
+                c_wfi_par = 1.5
+                c_wfi_perp = 0.75            
+                if rb_run:
+                    rb = rabbit.RABBIT(nshot, tbeg = self.tot['time'][0], tend = self.tot['time'][-1])
+                    rb_out = rb.rb_out
+                else:  # GIT, for testing
+                    rb_out = rb_io.RABBIT_OUT(nshot)
+                wfi_rb = c_wfi_par*rb_out.WfiParL + c_wfi_perp*rb_out.WfiPerp
+                t_rb = rb_out.time
+
+                self.tot['Wfi'] = np.interp(self.tot['time'], t_rb, wfi_rb)
+            else:
+                self.tot['Wfi'] = wfi.wfi(twfi, self.tth['tau_sd'], dt)
+
             self.tot['Wth'] = self.tot['Wmhd'] - self.tot['Wfi']
 
             self.tot['P_TOT'] = self.tot['P_OH'] + self.tot['heat_par']['fac_icrh']*self.tot['PICR_TOT'] + \
@@ -684,34 +752,40 @@ class ex_toth:
             self.tot['n/nGW'][ind] = 0
 
 # Tau from scaling laws
-
+            ntau = len(taulaws)
             print('\nCalculating tau from scaling laws')
-            tauscal = {}
-            hfac = {}
-            ion_mass = np.float32(ion_mass)
-            for law in tth_laws[:-1]:
-                print(law)
-                parms = laws[law]
-                tauscal[law] = np.zeros_like(ttot)
-                tauscal[law] += parms['coeff']*np.power(ion_mass, parms['A'])
+            self.tth['Scalings'] = np.zeros((nttot, ntau), dtype=np.float32)
+            self.tth['H/L-facs'] = np.zeros((nttot, ntau), dtype=np.float32)
 
+            for pn in hpar_d.keys():
+                self.tth['scal_par'][pn] = np.zeros(ntau, dtype=np.float32)
+
+            ion_mass = np.float32(ion_mass)
+            for jlaw, law in enumerate(taulaws[:-1]):
+                print(law)
+                parms = tau_laws[law]
+                tausc = parms['coeff']*np.power(ion_mass, parms['A'])*np.ones_like(ttot)
                 for sig in ('IpiFP', 'Rgeo', 'ahor', 'kappa', 'karea', 'P_TOT', 'ne_lav', 'BTF', 'P_NET'):
                     sig_fac = 1
                     if sig in ('IpiFP', 'P_TOT', 'P_NET'):
                         sig_fac = 1.e-6
                     ind_pos = (np.nan_to_num(self.tot[sig]) > 0)
-                    tauscal[law][ind_pos] *= np.power(sig_fac*self.tot[sig][ind_pos], parms[sig])
-                    tauscal[law][~ind_pos] = 0
-
+                    tausc[ind_pos] *= np.power(sig_fac*self.tot[sig][ind_pos], parms[sig])
+                    tausc[~ind_pos] = 0
                 scal_mod = parms['scalmod']
                 if scal_mod in self.tot.keys():
                     tau = self.tot[scal_mod]
                 else:
                     tau = self.tth[scal_mod]
 
-                ind_pos = (tauscal[law] > 0)
-                hfac[law] = np.zeros_like(ttot)
-                hfac[law][ind_pos] = tau[ind_pos]/tauscal[law][ind_pos]
+                self.tth['Scalings'][:, jlaw] = tausc
+                ind = (tausc > 0)
+                self.tth['H/L-facs'][ind, jlaw] = tau[ind]/tausc[ind]
+
+                for pn, base in hpar_d.items():
+                    self.tth['scal_par'][pn][jlaw] = tau_laws[law][base]
+
+            self.tth['scal_par']['descript'] = taulaws
 
 # Kardaun scalings
 # 1) Eq 2 in Kardaun O. et al., 
@@ -757,85 +831,46 @@ class ex_toth:
                 lnWK += kard[pn][0]*logpn + kard[pn][1]*logpn**2
 
             law = 'KARDAUN, IAEA 2006, IT/P10'
-            tauscal[law] = 1.e6*np.exp(lnWK)/self.tth['P_NET']
-            tmp2 = self.tth['tau_th']/tauscal[law]
-            tmp2[np.isinf(tmp2)] = 0
-            hfac[law] = np.nan_to_num(tmp2)
+            tausc = 1.e6*np.exp(lnWK)/self.tth['P_NET']
+            self.tth['Scalings'][:, ntau-1] = tausc
+            hkard = self.tth['tau_th']/tausc
+            hkard[np.isinf(hkard)] = 0
+            self.tth['H/L-facs'][:, ntau-1] = np.nan_to_num(hkard)
 
-            self.tth['Scalings'] = np.zeros((nttot, len(tth_laws)), dtype=np.float32)
-            self.tth['H/L-facs'] = np.zeros((nttot, len(tth_laws)), dtype=np.float32)
-
-            for pn in parlaws.keys():
-                self.tth['scal_par'][pn] = np.zeros(len(tth_laws), dtype=np.float32)
-
-# H factors
-
-            for jlaw, law in enumerate(tth_laws):
-                self.tth['H/L-facs'][:, jlaw] = hfac[law]
-                self.tth['Scalings'][:, jlaw] = tauscal[law]
-                for pn, base in parlaws.items():
-                    self.tth['scal_par'][pn][jlaw] = laws[law][base]
-
-            self.tth['scal_par']['descript'] = tth_laws
 
 # L->H scaling
 # Y. Martin, Journal of Physics: Conference Series 123 (2008) 012033, eq 2-3
-            lh_laws = { \
-                'ITPA Threshold Power Scaling 2007 (Plasma Surface S)': \
-                {'prefac':0.0488, 'Rgeo':0, 'ahor':0, 'S':0.941, '<ne>_H-1':0.717, 'Btf':0.803}, \
-                'ITPA Threshold Power Scaling 2007 (Rgeo and ahor)': \
-                {'prefac':2.150, 'Rgeo':0.999, 'ahor':0.975, 'S':0, '<ne>_H-1':0.782, 'Btf':0.772} \
-            }
-            lhlaws = ('ITPA Threshold Power Scaling 2007 (Plasma Surface S)', \
-                      'ITPA Threshold Power Scaling 2007 (Rgeo and ahor)')
 
             nlh = len(lhlaws)
             self.tth['L2H_SCAL'] = np.zeros((nttot, nlh), dtype=np.float32)
             self.tth['L2H_facs'] = np.zeros((nttot, nlh), dtype=np.float32)
-            self.tth['L2H_par'] = {}
-            l2hscal = {}
-            l2hfac  = {}
 
+            self.tth['L2H_par'] = {}
             for pn in ('prefac', 'Rgeo', 'ahor', 'S', '<ne>_H-1', 'Btf'):
                 self.tth['L2H_par'][pn] = np.zeros(nlh, dtype=np.float32)
 
-            for law, par in lh_laws.items():
-                l2hscal[law] = np.zeros_like(ttot)
-                l2hfac[law]  = np.zeros_like(ttot)
-                tmp = np.ones(nttot)
-                for sig in ('Rgeo', 'ahor', '<ne>_H-1', 'Btf'):
+            for jlaw, law in enumerate(lhlaws):
+                par = lh_laws[law]
+                pthr = 1e6*par['prefac']*np.ones_like(ttot)
+                for sig in ('Rgeo', 'ahor', '<ne>_H-1', 'Btf', 'S'):
                     if sig == '<ne>_H-1':
                         sig_fac = 1.e-1
                     else:
                         sig_fac = 1
-                    arr = self.tot[parlaws[sig]]
-                    ind_pos = (par > 0)
-                    tmp[ind_pos] *= np.power(sig_fac*arr[ind_pos], par[sig])
-                    tmp[~ind_pos] = 0
-                ind_pos = (self.tot['Surface'] > 0)
-                tmp[ind_pos] *= 1e6*par['prefac']*np.power(self.tot['Surface'][ind_pos], par['S'])
-                tmp[~ind_pos] = 0
-                l2hscal[law] = tmp
-                ind = np.where(tmp > 0)
-                l2hfac[law][ind] = self.tth['P_NET'][ind]/tmp[ind]
+                    arr = self.tot[lh_d[sig]]
+                    ind_pos = (arr > 0)
+                    pthr[ind_pos] *= np.power(sig_fac*arr[ind_pos], par[sig])
+                    pthr[~ind_pos] = 0
+                self.tth['L2H_SCAL'][:, jlaw] = pthr
+                ind = np.where(pthr > 0)
+                self.tth['L2H_facs'][ind, jlaw] = self.tth['P_NET'][ind]/pthr[ind]
 
-            for jlaw, law in enumerate(lhlaws):
-                self.tth['L2H_facs'][:, jlaw] = l2hfac[law]
-                self.tth['L2H_SCAL'][:, jlaw] = l2hscal[law]
-                for pn, val in lh_laws[law].items():
+                for pn, val in par.items():
                     self.tth['L2H_par'][pn][jlaw] = val
             self.tth['L2H_par']['descript'] = lhlaws
 
 # Q/(Q+5) figure of merit
 
-            Ggw_laws = { \
-                'ITERH-98P(y, th, 2), ELMy, Wth/Pnet': \
-                {'prefac':35.5, 'G_H_exp':3.23, 'G_bn_exp':-1.23, 'G_q_exp':-3.1}, \
-                'DS03 or ESGB, McDonald, ppcf 46 (2004) A215 equation 11': \
-                {'prefac':22.8, 'G_H_exp':2.22, 'G_bn_exp':-0.22, 'G_q_exp':-2.71}, \
-                'CORDEY05, NF 45 (2005) 1078, equation 9': \
-                {'prefac':6.07, 'G_H_exp':1.82, 'G_bn_exp':0.18, 'G_q_exp':-2.22} \
-            }
 
             nGgw = len(Ggw_laws)
             self.tth['G_gw'] = np.zeros((nttot, nGgw), dtype=np.float32)
@@ -843,20 +878,21 @@ class ex_toth:
             for pn in ('prefac', 'G_H_exp', 'G_bn_exp', 'G_q_exp'):
                 self.tth['G_gw_par'][pn] = np.zeros(nGgw, dtype=np.float32)
 
-            jlaw = 0
-            for law, par in Ggw_laws.items():
-                ind_pos = (hfac[law] > 0) & (self.tot['beta_Nth'] > 0) & (self.tot['q95'] > 0)
+            for jlaw, law in enumerate(Ggwlaws):
+                par = Ggw_laws[law]
+                hfac = self.tth['H/L-facs'][:, jlaw + 7]
+                ind_pos = (hfac > 0) & (self.tot['beta_Nth'] > 0) & (self.tot['q95'] > 0)
                 self.tth['G_gw'][ind_pos, jlaw] = par['prefac'] * \
-                    np.power(hfac[law][ind_pos], par['G_H_exp']) * \
+                    np.power(hfac[ind_pos], par['G_H_exp']) * \
                     np.power(self.tot['beta_Nth'][ind_pos], par['G_bn_exp']) * \
                     np.power(self.tot['q95'][ind_pos], par['G_q_exp'])
                 for pn, val in par.items():
                     self.tth['G_gw_par'][pn][jlaw] = val
-                jlaw += 1
-            self.tth['G_gw_par']['descript'] = (tth_laws[7], tth_laws[8], tth_laws[9])
+            self.tth['G_gw_par']['descript'] = [taulaws[7], taulaws[8], taulaws[9]]
 
 # Final settings
 
+            self.tot['ne_lav'] *= 1e19
             for jdcn in range(n_dcn):
                 self.tot['H-%d_corr' %jdcn] *= 1e19
 

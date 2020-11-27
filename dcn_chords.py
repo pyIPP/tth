@@ -1,7 +1,9 @@
+import sys
+sys.path.append('/afs/ipp/aug/ads-diags/common/python/lib/')
 import numpy as np
-import map_equ_20161123
+from sf2equ_20200525 import READ_EQU
+import mapeq_20200507 as meq
 
-eqm = map_equ_20161123.equ_map()
 
 HFS_R = np.array([1.0525, 1.006, 1.0067, 1.008, 1.1287, 1.0946])
 HFS_z = np.array([0.2233, 0.1447, 0.3154, -0.146, 1.0566, 0.8032])
@@ -10,7 +12,7 @@ LFS_z = np.array([-0.0217, 0.1533, 0.3236, -0.1603, 0.1528, 0.4426])
 
 Rmid = 0.5*(HFS_R + LFS_R)
 zmid = 0.5*(HFS_z + LFS_z)
-phi_up = 180./np.pi*np.arctan((LFS_z - HFS_z)/(LFS_R -HFS_R))
+phi_up = np.degrees(np.arctan2(LFS_z - HFS_z, LFS_R - HFS_R))
 
 n_dcn = len(Rmid)
 
@@ -19,59 +21,53 @@ def chord_len(nshot, diag='EQH', dcn_ch=None):
     dtot = {}
     nttot = 10000
     dt = 0.001
-    dtot['time'] = dt*(1 + np.arange(nttot))
-    equ_diag = diag
-    eqm_status = eqm.Open(nshot, diag=diag)
+    dtot['time'] = dt*(1. + np.arange(nttot, dtype=np.float32))
 
     if dcn_ch == None:
         dcn_channels = range(n_dcn)
     else:
         dcn_channels = np.atleast_1d(dcn_ch)
 
-    while not eqm_status:
-        for equ_diag in ('EQH', 'EQI', 'FPP'):
-            eqm_status = eqm.Open(nshot, diag=equ_diag)
-            if eqm_status:
-                break
-    if not eqm_status:
-        dtot = np.zeros((nttot, n_dcn))
-        return dtot
+    eqsf = READ_EQU(nshot, diag='EQH', exp='AUGD', ed=0)
+    if not hasattr(eqsf, 'shot'):
+        eqsf = READ_EQU(nshot, diag='EQI', exp='AUGD', ed=0)
+        if not hasattr(eqsf, 'shot'):
+            eqsf = READ_EQU(nshot, diag='FPP', exp='AUGD', ed=0)
+            if not hasattr(eqsf, 'shot'):
+                return np.zeros( (nttot, len(dcn_channels)) )
+    eqsf.read_scalars()
+    eqsf.read_profiles()
+    eqsf.read_pfm()
+    eqsf.close()
 
     for jdcn in dcn_channels:
-        print('Determining chord length of H-%d using equ %s' %(jdcn, diag) )
-        R1, z1 = eqm.cross_surf(0.9999, r_in=Rmid[jdcn], z_in=zmid[jdcn], theta_in=np.radians(phi_up[jdcn]), coord_in='rho_pol')
+        if (nshot < 32000) and (jdcn == 0):
+            dtot[jdcn] = np.ones(nttot, dtype=np.float32)
+        else:
+            print('Determining chord length of H-%d using equ %s' %(jdcn, diag) )
+            R1, z1 = meq.cross_sep(eqsf, r_in=Rmid[jdcn], z_in=zmid[jdcn], theta_in=np.radians(phi_up[jdcn]) )
 
-        chord = np.hypot(R1[:, 0, 1] - R1[:, 0, 0], z1[:, 0, 1] - z1[:, 0, 0])
+            chord = np.hypot(R1[:, 1] - R1[:, 0], z1[:, 1] - z1[:, 0])
 
-        dtot[jdcn] = np.interp(dtot['time'], eqm.t_eq, chord)
-    dtot['diag'] = equ_diag
+            dtot[jdcn] = np.interp(dtot['time'], eqsf.time, chord) + 1.e-8
+            print('First intersection R: %8.4f' %R1[0, 0] )
+            del R1, z1
+    dtot['diag'] = eqsf.diag
+    dtot['ed']   = eqsf.ed
 
     return dtot
 
 
 if __name__ == '__main__':
 
-    import sys
-    sys.path.append('/afs/ipp/aug/ads-diags/common/python/lib/')
     import matplotlib.pylab as plt
-    import dd_20140407
+    import dd_20200525 as dd
 
-    sf = dd_20140407.shotfile()
-#    dtot = cut_surf(14481, diag='FPP')
+    sf = dd.shotfile()
 
-    shot = 19430
-#    shot = 28053
-    if False:
-        if eqm.Open(shot, diag='EQH'):
-            eqm.read_ssq()
-            for sig in ('H-1', 'H-2', 'H-3', 'H-4', 'H-5', 'V-1', 'V-2'):
-                plt.plot(eqm.t_eq, eqm.ssq['len%s' %sig], label=sig)
-            plt.show()
+    shot = 34027
 
-    if True:
-        dtot = cut_surf(shot, diag='EQH')
-        for key in R.keys():
-            plt.plot(dtot['time'], dtot['len%s' %key], label=key)
-        plt.figtext(0.5, 0.85, dtot['diag'], ha='center')
-        plt.legend()
-        plt.show()
+    dtot = chord_len(shot, diag='EQH', dcn_ch=0)
+    plt.plot(dtot['time'], dtot[0])
+    plt.figtext(0.5, 0.85, dtot[0], ha='center')
+    plt.show()

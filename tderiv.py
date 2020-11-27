@@ -186,7 +186,7 @@ def dvdt_ic(val, ref, dt=0.001, dtint=0.0301, dt_ic=0.0301, err_ref=1.e5, err_ab
         ind = range(i0, i1-2)
         dvdt2[ind] = dvdt[ind] + np.gradient(int_dv[ind], dt)
     else:
-        print 'no integral correction in routine time_der4'
+        print('no integral correction in routine time_der4')
 
     return dvdt2
 
@@ -198,8 +198,8 @@ def corr_u(time, flux_in, RC):
     nt = len(flux_in)
     dt = time[1] - time[0]
     omega = 2*np.pi*np.fft.fftfreq(nt, d=dt)
-    print time[-1] - time[0]
-    print 'omega=', omega
+    print(time[-1] - time[0])
+    print('omega=', omega)
     print('Fourier transform of Phi(B)')
     flux_fft = np.fft.fft(flux_in)
     fac = 1.j*omega/(1 + 1.j*omega*RC) # d/dt with low pass filter

@@ -20,9 +20,10 @@ class IOC_FLUX:
             self.neut_flux = np.empty(ntioc)
             self.neut_flux[:] = np.nan
             for jioc, sig in enumerate(ioc_sig):
-                trace = sf.GetSignal(sig)[:ntioc]
+                trace = sf.GetSignal(sig)
                 if (trace is None) or (np.sum(trace) == 0.):
                     continue
+                trace = trace[:ntioc]
                 no_nan = np.isfinite(trace)
                 if verb:
                     print(sig, len(no_nan), np.sum(no_nan), np.sum(trace), len(trace), len(self.neut_flux), len(self.tioc))
@@ -70,7 +71,7 @@ if __name__ == '__main__':
     plt.figure(1)
  
     for sig in ioc_sig:
-        if sig in dioc.iterkeys():
+        if sig in dioc.keys():
             trace = dioc[sig]
             plt.plot(ioc.tioc, trace, label=sig)
 
