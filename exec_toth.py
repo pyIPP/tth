@@ -1,10 +1,11 @@
-import os
+import os, sys
+sys.path.append('/afs/ipp/home/g/git/python/rabbit')
 import numpy as np
 import scipy.ndimage
 import NBIlosses, tderiv, wfi, ne_fringe, dcn_chords, ne_sep_sol
 import dd_20180130, jou_main_spec
 
-import rabbit, rb_io, write_rabbit
+import rabbit, rb_io
 
 sf = dd_20180130.shotfile()
 

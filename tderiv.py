@@ -50,6 +50,7 @@ def dvdt_ic(val, ref, dt=0.001, dtint=0.0301, dt_ic=0.0301, err_ref=1.e5, err_ab
     time = dt*np.arange(1, n_tim+1)
     dref = np.abs(np.diff(ref))
     ndt = int(dtint/dt)
+    print('tderv:dvdt_ic', n_tim, time[-1])
 
     istat = np.zeros(n_tim, dtype=np.int32)
     li = np.zeros(n_tim+ndt, dtype=np.int32)
@@ -183,6 +184,7 @@ def dvdt_ic(val, ref, dt=0.001, dtint=0.0301, dt_ic=0.0301, err_ref=1.e5, err_ab
             int_dv[jt] = np.average(dvn[il:ir+1])
 
 # Calculate d/dt of the time integral
+        print('GIT test', i0, i1-2, kl3+2*ndt_ic+6)
         ind = range(i0, i1-2)
         dvdt2[ind] = dvdt[ind] + np.gradient(int_dv[ind], dt)
     else:
