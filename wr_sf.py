@@ -9,6 +9,7 @@ sf = dd_20180130.shotfile()
 def write_tot_tth(toth_d, w_tth=True):
 
     nshot = toth_d['shot']
+
     try:
         toth = exec_toth.ex_toth(nshot, toth_d)
     except:
