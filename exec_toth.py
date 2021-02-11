@@ -717,8 +717,27 @@ class ex_toth:
                 if rb_run:
                     rb = rabbit.RABBIT(nshot, tbeg = self.tot['time'][0], tend = self.tot['time'][-1])
                     rb_out = rb.rb_out
+                    te_list = rb.rb_in.profiles.prof['E'].sflists
+                    ti_list = rb.rb_in.profiles.prof['I'].sflists
+                    ne_list = rb.rb_in.profiles.prof['N'].sflists
+                    wt_list = rb.rb_in.profiles.prof['V'].sflists
+                    n_par = 6
+                    for j in range(len(te_list), n_par):
+                        te_list += [' ']
+                    for j in range(len(ti_list), n_par):
+                        ti_list += [' ']
+                    for j in range(len(ne_list), n_par):
+                        ne_list += [' ']
+                    for j in range(len(wt_list), n_par):
+                        wt_list += [' ']
+                    self.tot['ProfDiag'] = { \
+                        'TeDiag': te_list, \
+                        'TiDiag': ti_list, \
+                        'NeDiag': ne_list, \
+                        'WtDiag': wt_list}
                 else:  # GIT, for testing
                     rb_out = rb_io.RABBIT_OUT(nshot)
+
                 wfi_rb = c_wfi_par*rb_out.WfiParL + c_wfi_perp*rb_out.WfiPerp
                 t_rb = rb_out.time
 

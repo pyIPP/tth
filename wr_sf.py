@@ -20,7 +20,7 @@ def write_tot_tth(toth_d, w_tth=True):
         if sfdiff.sfdiff(nshot, toth_d['out_exp'], 'TOT', toth.tot):
             ww_20180130.write_sf(nshot, toth.tot, sfhdir, 'TOT', exp=toth_d['out_exp'])
 
-        toth.tth['TOT_file']['expr']    = toth_d['out_exp']
+        toth.tth['TOT_file']['expr'] = toth_d['out_exp']
         if sf.Open('TOT', nshot, experiment=toth_d['out_exp']):
             print('TOT edition used for TTH: %d' %sf.edition)
             toth.tth['TOT_file']['edition'] = sf.edition
@@ -33,9 +33,9 @@ def write_ttr(toth_d):
 
     nshot = toth_d['shot']
     try:
-        toth = exec_toth.ex_toth(nshot, toth_d, rb_run=False)
+        toth = exec_toth.ex_toth(nshot, toth_d)
     except:
-        print('TOT/TTH not executed')
+        print('TTR not executed')
         return
 
     sfhdir = os.path.dirname(os.path.realpath(__file__))

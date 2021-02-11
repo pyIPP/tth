@@ -14,11 +14,15 @@ lastshot = dd_20180130.LastShotNr()
 # After 19:00, once
 
 # TOT/TTH
+toth_d['rb_wfi'] = False
+toth_d['rb_run'] = False
 for nshot in range(lastshot-25, lastshot):
     toth_d['shot'] = nshot
     wr_sf.write_tot_tth(toth_d)
 
 # TTR (using RABBIT for Wfi)
-for nshot in range(lastshot-25, lastshot):
+toth_d['rb_wfi'] = True
+toth_d['rb_run'] = True
+for nshot in range(lastshot-75, lastshot):
     toth_d['shot'] = nshot
     wr_sf.write_ttr(toth_d)

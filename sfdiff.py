@@ -1,7 +1,7 @@
-import dd_20180130
+import dd_20200525
 import numpy as np
 
-sf  = dd_20180130.shotfile()
+sf  = dd_20200525.shotfile()
 
 #-----------------------
 def sfdiff(nshot, exp, diag, dcheck, toler_frac=0.0001):

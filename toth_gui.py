@@ -105,7 +105,7 @@ class TOTH:
 
         self.toth_d = {}
         user = os.getenv('USER')
-        dic_init = {'shot': '28053', 't_fringe': 0.,\
+        dic_init = {'shot': '38384', 't_fringe': 0.,\
              'ne_exp' : 'AUGD', 'ne_ed' : 0, \
              'equ_exp': 'AUGD', 'equ_ed': 0}
         for key in ('shot', 'ne_exp', 'ne_ed', 'equ_exp', 'equ_ed', 't_fringe'):
@@ -123,7 +123,8 @@ class TOTH:
 
         key = 'out_exp'
         self.toth_d[key] = tk.StringVar()
-        self.toth_d[key].set(user)
+#        self.toth_d[key].set(user)
+        self.toth_d[key].set('AUGD')
         for val in (user, 'AUGD'):
             ttk.Radiobutton(locframe, variable=self.toth_d[key], \
                 value=val, text=val).pack(side=tk.LEFT, anchor=tk.W)
@@ -184,7 +185,10 @@ class TOTH:
             ttk.Label(locframe, text=txt).pack(side=tk.LEFT, anchor=tk.W, padx=xpad)
 
             self.toth_d[key] = tk.BooleanVar()
-            self.toth_d[key].set(False)
+            if key in ('rb_wfi', 'rb_run'):
+                self.toth_d[key].set(True)
+            else:
+                self.toth_d[key].set(False)
             ttk.Checkbutton(locframe, variable=self.toth_d[key]).pack(side=tk.LEFT, anchor=tk.W)
 
         tothframe.mainloop()
